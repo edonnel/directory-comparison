@@ -3,7 +3,7 @@
 
 	class deployment {
 
-		public static function get_ignored_files(\mysqli $conn, $dir_1 = null, $dir_2 = null) {
+		public static function get_ignored_files(\mysqli $conn, $dir_1 = null, $dir_2 = null, $assoc = true) {
 			$stmt           = "SELECT `file_path`, `type`, false as 'inherit' FROM `staging_files_ignored`";
 			$query          = $conn->query($stmt);
 			$ignored_files  = $query->fetch_all(true);
@@ -38,7 +38,16 @@
 				}
 			}
 
-			return $ignored_files;
+			if ($assoc)
+				return $ignored_files;
+			else {
+				$files_to_exclude   = array();
+
+				foreach ($ignored_files as $file_to_exclude)
+					$files_to_exclude[] = $file_to_exclude['file_path'];
+
+				return $files_to_exclude;
+			}
 		}
 
 		public static function get_pushed_files_count(\mysqli $conn) {
@@ -124,7 +133,7 @@
 					// copy modified time
 					$file_time = filemtime($file_from);
 
-					touch($file_to, $file_time);
+					$touch = touch($file_to, $file_time);
 
 					if ($is_dir) {
 						$name = 'Directory';
@@ -139,11 +148,20 @@
 					$query = self::add_to_push_table($conn, $file, $type, $from);
 
 					if ($query) {
-						$result
-							->set_success(true)
-							->set_msg($name.' <b>'.$file.'</b> pushed to '.($from == 'stag' ? 'Production' : 'Staging').'.')
-							->set_data('title', 'File Pushed')
-							->set_data('type', 'success');
+						if ($touch) {
+							$result
+								->set_success(true)
+								->set_msg($name.' <b>'.$file.'</b> pushed to '.($from == 'stag' ? 'Production' : 'Staging').'.')
+								->set_data('title', 'File Pushed')
+								->set_data('type', 'success');
+						} else {
+							$result
+								->set_success(true)
+								->set_msg($name.' <b>'.$file.'</b> pushed to '.($from == 'stag' ? 'Production' : 'Staging').' but the modified date could not be changed.')
+								->set_data('title', 'File Pushed With Issues')
+								->set_data('type', 'warning');
+						}
+
 					} else {
 						$result
 							->set_success(true)

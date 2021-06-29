@@ -33,27 +33,28 @@
 
 		public static function get_directory_listing($dir_path, $files_to_exclude = array(), $limit = 0) : array {
 			$filter = function ($iter_file, $key, $iterator) use ($files_to_exclude, $dir_path) {
-				$pathname = str_replace($dir_path, '', $iter_file->getRealPath());
+				$path       = $iter_file->getPath().'/'.$iter_file->getFilename();
+				$pathname   = str_replace($dir_path, '', $path);
 
-				return !(in_array($pathname, $files_to_exclude));
+				return (!in_array($pathname, $files_to_exclude));
 			};
 
 			$rdi    = new \RecursiveDirectoryIterator($dir_path, \RecursiveDirectoryIterator::SKIP_DOTS);
 			$rcfi   = new \RecursiveCallbackFilterIterator($rdi, $filter);
 			$rii    = new \RecursiveIteratorIterator($rcfi, \RecursiveIteratorIterator::SELF_FIRST);
 
-//			$rii = new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator($dir_path));
 			$files = array();
 
 			foreach ($rii as $iter_file) {
 
-				$pathname = str_replace($dir_path, '', $iter_file->getRealPath());
+				$path       = $iter_file->getPath().'/'.$iter_file->getFilename();
+				$pathname   = str_replace($dir_path, '', $path);
 
 				$file = new file();
 				$file
 					->set_name($iter_file->getFilename())
 					->set_path($pathname)
-					->set_full_path($iter_file->getRealPath())
+					->set_full_path($path)
 					->set_date($iter_file->getMTime())
 					->set_level($rii->getDepth())
 					->set_parent_name(dirname($pathname));
@@ -63,7 +64,7 @@
 
 					$children_files = new \RecursiveIteratorIterator($rii->getChildren(), \RecursiveIteratorIterator::CHILD_FIRST);
 
-					foreach($children_files as $child_file)
+					foreach ($children_files as $child_file)
 						$num_children++;
 
 					$file->set_num_children($num_children);
@@ -75,7 +76,8 @@
 				if ($iter_file->isFile())
 					$file->set_file(true);
 
-				$files[$file->get_path()] = $file;
+				if ($pathname != '')
+					$files[$file->get_path()] = $file;
 			}
 
 			return $files;
@@ -89,96 +91,6 @@
 			} else
 				return 0;
 		}
-
-		/*public static function get_directory_listing($dir_path, $files_to_exclude = array(), $limit = 0) : array {
-			$file = new file();
-			$file
-				->set_file(true)
-				->set_dir(false)
-				->set_name(dirname($dir_path))
-				->set_path('')
-				->set_full_path($dir_path);
-
-			return self::get_children_files($file, $files_to_exclude, $limit);
-		}*/
-
-		/*private static function get_children_files(file $file, $files_to_exclude = array(), $limit = 0, $level = 0, $files = array(), $num_children = 0) : array {
-			$file_path      = $file->get_path();
-			$file_path_full = $file->get_full_path();
-			$dir_path       = str_replace($file_path, '', $file_path_full);
-			$dir_iter       = new \RecursiveDirectoryIterator($file_path_full, \RecursiveDirectoryIterator::SKIP_DOTS);
-
-			if (!in_array($file_path, $files_to_exclude)) {
-
-				foreach ($dir_iter as $iter_file) {
-
-					if (!in_array(str_replace($dir_path, '', $iter_file->getRealPath()), $files_to_exclude)) {
-
-						$file_new = self::get_file_from_spl($iter_file, $dir_path);
-						$file_new->set_level($level);
-						$file_new->set_parent($file);
-
-						// if dir, look for children
-						if ($file_new->is_dir() && $dir_iter->hasChildren()) {
-
-							$children_files = self::get_children_files($file_new, $files_to_exclude, $limit, ($level + 1), $files);
-
-							$file_new
-								->set_children($children_files)
-								->set_num_children(count($children_files));
-						} else
-							$children_files = null;
-
-						// add file to array
-						$files[$file_new->get_path()] = $file_new;
-
-						// add its children
-						if ($children_files) {
-							foreach ($children_files as $child_file)
-								$files[$child_file->get_path()] = $child_file;
-						}
-
-						if ($limit > 0 && count($files) >= $limit)
-							return $files;
-					}
-
-					$children_files = null; // necessary?
-				}
-			}
-
-			return $files;
-		}*/
-
-		/*// returns directory in one dimension
-		public static function get_flat_directory(directory $dir, $files = array(), $return = array()) : array {
-			if (!$files)
-				$files = $dir->get_files();
-
-			foreach ($files as $file) {
-				$return[$file->get_path()] = $file;
-
-				if ($file->is_dir() && ($children = $file->get_children())) {
-					$return = self::get_flat_directory($dir, $children, $return);
-				}
-			}
-
-			return $return;
-		}*/
-
-		/*public function print_dir($files = null) : void {
-			if (!$files)
-				$files = $this->files;
-
-			foreach ($files as $file) {
-				for ($i = 0; $i < $file->get_level(); $i++)
-					echo '|&nbsp;&nbsp;&nbsp;&nbsp;';
-
-				echo $file->get_path().'<br>';
-
-				if ($file->is_dir() && ($children = $file->get_children()))
-					$this->print_dir($children);
-			}
-		}*/
 
 		public static function get_directory_changes(directory $directory, directory $directory_other, $all_files = false) : \changes {
 			if (!$all_files)
@@ -199,7 +111,7 @@
 
 					if ($file_other) {
 
-						$dont_add = $file->is_dir();
+						$dont_add = $file->is_dir() || $file_other->is_dir();
 
 						$change->set_object_other($file_other);
 
@@ -243,31 +155,23 @@
 
 			return $dirs;
 		}
-
-		private static function get_file_from_spl(\SplFileInfo $spl_file_info, $dir_path) : file {
-			$file = new file();
-			$file
-				->set_file($spl_file_info->isFile())
-				->set_dir($spl_file_info->isDir())
-				->set_date($spl_file_info->getMTime())
-				->set_name($spl_file_info->getFilename())
-				->set_path(str_replace($dir_path, '', $spl_file_info->getRealPath()))
-				->set_full_path($spl_file_info->getRealPath());
-
-			return $file;
-		}
 	}
 
 	class file {
-		private $name, $path, $full_path, $date, $parent_name;
+		private
+			$name,
+			$path,
+			$full_path,
+			$date,
+			$parent_name;
+
 		private
 			$file = false,
 			$dir = false;
 
-		private $children       = array();
-		private $parent         = null;
-		private $level          = 0;
-		private $num_children   = 0;
+		private
+			$level = 0,
+			$num_children = 0;
 
 		public function set_name($name) : file {
 			$this->name = $name;
@@ -311,20 +215,8 @@
 			return $this;
 		}
 
-		public function set_children(array $children) : file {
-			$this->children = $children;
-
-			return $this;
-		}
-
 		public function set_level(int $level) : file {
 			$this->level = $level;
-
-			return $this;
-		}
-
-		public function set_parent(file $parent) : file {
-			$this->parent = $parent;
 
 			return $this;
 		}
@@ -363,16 +255,8 @@
 			return $this->dir;
 		}
 
-		public function get_children() : array {
-			return $this->children;
-		}
-
 		public function has_children() : bool {
 			return (!empty($this->children));
-		}
-
-		public function get_parent() : file {
-			return $this->parent;
 		}
 
 		public function get_level() : int {

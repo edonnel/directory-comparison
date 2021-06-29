@@ -12,13 +12,19 @@
 		'unignore',
 	);
 
-	if (in_array($_GET['act'], $valid_acts)) {
+	if (isset($_GET['act']) && in_array($_GET['act'], $valid_acts)) {
 
 		require_once __DIR__.'/src/php/directory.class.php';
 		require_once __DIR__.'/src/php/deployment.class.php';
-		require_once __DIR__.'/_globals_dir.php';
 		require_once dirname(THIS_DIR).'/_src/php/result.class.php';
 		require_once dirname(THIS_DIR).'/_src/php/changes.class.php';
+
+		$files_to_exclude = \directory\deployment::get_ignored_files($conn, null, null, false);
+
+		$dir_stag = new directory\directory(PATH_STAG, $files_to_exclude);
+		$dir_prod = new directory\directory(PATH_PROD, $files_to_exclude);
+
+		$all_files = directory\directory::combine_directories($dir_stag, $dir_prod);
 
 		// push all
 

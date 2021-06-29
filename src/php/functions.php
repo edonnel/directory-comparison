@@ -16,8 +16,6 @@
 				$allow_push = true;
 		}
 
-//		pre_dump($all_files);
-
 		require THIS_DIR.'/view/files.php';
 	}
 
