@@ -4,6 +4,40 @@ const THIS_URL_DIR  = '<?= THIS_URL_DIR ?>';
 const PROCESS_URL   = THIS_URL_DIR+'/process.ajax.php';
 const a             = '<?= $_GET['a'] ?>';
 
+function load_jquery(method, wait, waited) {
+    const timeout = 50;
+
+    if (!wait)
+        wait = 1000;
+
+    if (!waited)
+        waited = 0;
+
+    if (waited >= wait) {
+        let script = document.createElement('script');
+        script.onload = function() {
+            if (method)
+                method();
+        };
+        script.src = '//code.jquery.com/jquery-3.6.0.min.js';
+
+        document.head.appendChild(script);
+
+        return;
+    }
+
+    if (window.jQuery) {
+        if (method)
+            method();
+    } else {
+        setTimeout(function () {
+            waited += timeout;
+
+            load_jquery(method, wait, waited);
+        }, timeout);
+    }
+}
+
 function get_url_params(url) {
     var vars = {};
     var parts = url.replace(/[?&]+([^=&]+)=([^&]*)/gi,
@@ -40,15 +74,19 @@ function get_listing_files(from, elem) {
     show_loading(elem);
 
     $.ajax({
-	    url:PROCESS_URL,
-	    type:'GET',
-	    data:{
-	        act:'get_listing_files',
-		    from:from,
+        url:PROCESS_URL,
+        type:'GET',
+        dataType:'json',
+        data:{
+            act:'get_listing_files',
+            from:from,
             a:a,
-	    },
+        },
         success:function(result) {
-            $(elem).html(result);
+            if (result.success)
+                $(elem).html(result.data.html);
+            else
+                $(elem).html(result.msg);
         },
     })
 }
@@ -59,23 +97,31 @@ function get_listing_files_all() {
 }
 
 function get_listing_ignored() {
-    show_loading('#listing_files_ignored');
+    const elem = '#listing_files_ignored';
+
+    show_loading(elem);
 
     $.ajax({
         url:PROCESS_URL,
         type:'GET',
+        dataType:'json',
         data:{
             act:'get_ignored_files',
             a:a,
         },
         success:function(result) {
-            $('#listing_files_ignored').html(result);
+            if (result.success)
+                $(elem).html(result.data.html);
+            else
+                $(elem).html(result.msg);
         },
     })
 }
 
 function get_listing_pushed(pag) {
-    show_loading('#listing_files_pushed');
+    const elem = '#listing_files_pushed';
+
+    show_loading(elem);
 
     if (!pag)
         pag = 1;
@@ -83,13 +129,17 @@ function get_listing_pushed(pag) {
     $.ajax({
         url:PROCESS_URL,
         type:'GET',
+        dataType:'json',
         data:{
             act:'get_pushed_files',
             a:a,
             pag:pag,
         },
         success:function(result) {
-            $('#listing_files_pushed').html(result);
+            if (result.success)
+                $(elem).html(result.data.html);
+            else
+                $(elem).html(result.msg);
         },
     })
 }
@@ -129,7 +179,7 @@ function delete_file(file, from) {
     });
 }
 
-function ignore_file(file) {
+function ignore_file(file, type) {
     $.ajax({
         url:PROCESS_URL,
         type:'GET',
@@ -137,6 +187,7 @@ function ignore_file(file) {
         data:{
             act:'ignore',
             file:file,
+            type:type,
         },
         success:function(result) {
             show_msg(result.msg, result.data.title, result.data.type);
@@ -161,7 +212,22 @@ function unignore_file(file) {
     });
 }
 
-function show_msg(title, text, type) {
+function save_notes(notes) {
+    $.ajax({
+        url:PROCESS_URL,
+        type:'GET',
+        dataType:'json',
+        data:{
+            act:'save_notes',
+            notes:notes,
+        },
+        success:function(result) {
+            show_msg(result.msg, result.data.title, result.data.type);
+        },
+    });
+}
+
+function show_msg(text, title, type) {
     var background_color = '#CFE2FF';
     var color = '#084298';
 
@@ -170,14 +236,14 @@ function show_msg(title, text, type) {
             background_color = '#D1E7DD';
             color = '#0f5132';
             break;
-	    case 'error':
+        case 'error':
             background_color = '#F8D7DA';
             color = '#842029';
             break;
-	    case 'warning':
+        case 'warning':
             background_color = '#fff3cd';
             color = '#664d03';
-	        break;
+            break;
     }
 
     let msg_html = '';
@@ -250,104 +316,142 @@ function show_loading(elem) {
     animate(loader_selector);
 }
 
-$(function() {
-    get_listing_all();
+load_jquery(function() {
 
-    $('#refresh').on('click', function() {
-        const $refresh = $(this);
-        const transition_time = 500;
+    const CSRF_TOKEN    = $('meta[name="csrf-token"]').attr('content');
 
-        $refresh.css({
-            transition:'all '+transition_time+'ms',
-            transform:'rotate(720deg)',
-        });
-
-        setTimeout(function() {
-            $refresh.css({
-                transition:'none',
-                transform:'rotate(0)',
-            });
-        }, transition_time);
-
-        get_listing_all();
-    });
-});
-
-$(document).on('click', '#pag_pushed .pag-first', function() {
-    const current = $(this).parents('.pag').data('current');
-
-    if (current > 1) {
-        get_listing_pushed(1);
-    }
-});
-
-$(document).on('click', '#pag_pushed .pag-prev', function() {
-    const current = $(this).parents('.pag').data('current');
-    const next = current - 1;
-
-    if (next >= 1) {
-        get_listing_pushed(next);
-    }
-});
-
-$(document).on('click', '#pag_pushed .pag-next', function() {
-    const current   = $(this).parents('.pag').data('current');
-    const total     = $(this).parents('.pag').data('total');
-    const next      = current + 1;
-
-    if (next <= total) {
-        get_listing_pushed(next);
-    }
-});
-
-$(document).on('click', '#pag_pushed .pag-last', function() {
-    const current   = $(this).parents('.pag').data('current');
-    const total     = $(this).parents('.pag').data('total');
-
-    if (current < total) {
-        get_listing_pushed(total);
-    }
-});
-
-// see more pushed files
-$(document).on('click', '.more', function() {
-    
-});
-
-$(document).on('click', '.listing a', function(e) {
-    e.preventDefault();
-
-    const href = $(this).attr('href');
-
-    if (href) {
-        const act   = get_url_param(href, 'act');
-        const file  = get_url_param(href, 'file');
-        var from    = null;
-
-        if (act && file) {
-            if (act == 'push' || act == 'delete')
-                from = get_url_param(href, 'from');
-            else
-                from = true;
-
-            if (from) {
-
-                switch (act) {
-                    case 'push':
-                        push_file(file, from);
-                        break;
-                    case 'delete':
-                        delete_file(file, from);
-                        break;
-                    case 'ignore':
-                        ignore_file(file);
-                        break;
-                    case 'unignore':
-                        unignore_file(file);
-                        break;
-                }
-            } else
-                alert('From parameter not found');
+    $.ajaxSetup({
+        headers : {
+            'CsrfToken':CSRF_TOKEN
         }
-    }
+    });
+
+    $(function() {
+        get_listing_all();
+
+        $('#refresh').on('click', function() {
+            const $refresh = $(this);
+            const transition_time = 500;
+
+            $refresh.css({
+                transition:'all '+transition_time+'ms',
+                transform:'rotate(720deg)',
+            });
+
+            setTimeout(function() {
+                $refresh.css({
+                    transition:'none',
+                    transform:'rotate(0)',
+                });
+            }, transition_time);
+
+            get_listing_all();
+        });
+    });
+
+    $(document).on('click', '#pag_pushed .pag-first', function() {
+        const current = $(this).parents('.pag').data('current');
+
+        if (current > 1) {
+            get_listing_pushed(1);
+        }
+    });
+
+    $(document).on('click', '#pag_pushed .pag-prev', function() {
+        const current = $(this).parents('.pag').data('current');
+        const next = current - 1;
+
+        if (next >= 1) {
+            get_listing_pushed(next);
+        }
+    });
+
+    $(document).on('click', '#pag_pushed .pag-next', function() {
+        const current   = $(this).parents('.pag').data('current');
+        const total     = $(this).parents('.pag').data('total');
+        const next      = current + 1;
+
+        if (next <= total) {
+            get_listing_pushed(next);
+        }
+    });
+
+    $(document).on('click', '#pag_pushed .pag-last', function() {
+        const current   = $(this).parents('.pag').data('current');
+        const total     = $(this).parents('.pag').data('total');
+
+        if (current < total) {
+            get_listing_pushed(total);
+        }
+    });
+
+    // see more pushed files
+    $(document).on('click', '.more', function() {
+
+    });
+
+    $(document).on('click', '.listing a', function(e) {
+        e.preventDefault();
+
+        const href = $(this).attr('href');
+
+        if (href) {
+            const act   = get_url_param(href, 'act');
+            const file  = get_url_param(href, 'file');
+            var from    = null;
+
+            if (act && file) {
+                if (act == 'push' || act == 'delete')
+                    from = get_url_param(href, 'from');
+                else
+                    from = true;
+
+                if (from) {
+
+                    switch (act) {
+                        case 'push':
+                            push_file(file, from);
+                            break;
+                        case 'delete':
+                            delete_file(file, from);
+                            break;
+                        case 'ignore':
+                            ignore_file(file);
+                            break;
+                        case 'unignore':
+                            unignore_file(file);
+                            break;
+                    }
+                } else
+                    alert('From parameter not found');
+            }
+        }
+    });
+
+    $(document).on('click', '#add_ignore', function() {
+        $('#modal_ignore').modal();
+    });
+
+    $('#modal_ignore_close').on('click', function() {
+        $('#modal_ignore').modal('close');
+    });
+
+    $('#modal_ignore_save').on('click', function() {
+        const val   = $('#modal_ignore_path').val();
+        const type  = $('#modal_ignore_type').val();
+
+        if (val !== '' && val !== ' ') {
+            ignore_file(val, type);
+
+            $('#modal_ignore').modal('close');
+        } else
+            alert('Ignore path cannot be blank.');
+    });
+
+    $('#notes_submit').on('click', function() {
+        const notes = $('#notes').val();
+
+        save_notes(notes);
+    });
+
 });

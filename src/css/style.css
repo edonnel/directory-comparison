@@ -78,6 +78,8 @@ table.right .push-link::before { font-size:18px; line-height:0; }
 .delete:hover { color:#e30000; }
 .push:hover { color:#2369A3; }
 
+/* pagination */
+
 .pag {
     margin-top:10px;
     display:flex;
@@ -110,3 +112,103 @@ table.right .push-link::before { font-size:18px; line-height:0; }
 .pag .pag-prev { padding-right:3px; }
 .pag .pag-next { padding-left:3px; }
 .pag .pag-last { padding-left:2px; }
+
+/* modal */
+
+/*.modal { background-color:white; border-radius:5px; }*/
+.modal .modal-header {}
+.modal .modal-body {}
+.modal .modal-footer {}
+
+/* alerts */
+
+.ed-alerts {}
+
+.ed-alerts .ed-alert {
+    position:relative;
+    padding:10px;
+    border:1px solid #337ab7;
+    border-left-width:5px;
+    border-radius:3px;
+    background-color:#d9edf7;
+    color:#666;
+    margin-top:10px;
+}
+
+.ed-alerts .ed-alert:not(:last-of-type) { margin-bottom:20px; }
+
+.ed-alerts .ed-alert .close {
+    position:absolute;
+    top:10px;
+    right:10px;
+    cursor:pointer;
+}
+
+.ed-alerts .ed-alert .ed-alert-title {
+    font-size:16px;
+    margin-top:0;
+    margin-bottom:5px;
+    color:#337ab7;
+    font-weight:600;
+}
+
+.ed-alerts .ed-alert.success {
+    border-color:#5cb85c;
+    background-color:#dff0d8;
+}
+
+.ed-alerts .ed-alert.warning {
+    border-color:#f0ad4e;
+    background-color:#fcf8e3;
+}
+
+.ed-alerts .ed-alert.error {
+    border-color:#d9534f;
+    background-color:#f2dede;
+}
+
+.ed-alerts .ed-alert.success .ed-alert-title,
+.ed-alerts .ed-alert.success .close { color:#5cb85c; }
+
+.ed-alerts .ed-alert.warning .ed-alert-title,
+.ed-alerts .ed-alert.warning .close { color:#f0ad4e; }
+
+.ed-alerts .ed-alert.error .ed-alert-title,
+.ed-alerts .ed-alert.error .close { color:#d9534f; }
+
+/* custom modal */
+
+.modal .modal-body .slash {
+    font-size:24px;
+    margin-right:10px;
+    color:gray;
+    line-height:1;
+}
+
+.modal .modal-body .code {
+    font-family:'Roboto Mono', monospace;
+    background-color:#efefef;
+    padding:5px;
+    line-height:1;
+}
+
+/* notes section */
+
+.notes-section {}
+.notes-section::after { content:''; display:table; clear:both; }
+.notes-section label { display:block; font-weight:600; font-size:15px; margin-bottom:3px; }
+.notes-section textarea {
+    width:100%;
+    border:solid 1px #cccccc;
+    padding:10px;
+    border-radius:4px;
+    font-size:16px;
+    transition:all 0.2s;
+    min-height:150px;
+}
+.notes-section textarea:focus {
+    border-color:#2369a3;
+    box-shadow:0 0 3px #2369a3;
+    outline:0;
+}
+.notes-section #notes_submit { margin-top:10px; float:right; }

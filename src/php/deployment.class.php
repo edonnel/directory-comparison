@@ -67,6 +67,7 @@
 		}
 
 		public static function push_file(\mysqli $conn, string $file, directory $dir_from, directory $dir_to, $from) : \result {
+			$file       = self::clean_filename($file);
 			$file_from  = $dir_from->get_file($file)->get_full_path();
 			$file_to    = $dir_to->get_dir().$dir_from->get_file($file)->get_path();
 
@@ -182,6 +183,7 @@
 		}
 
 		public static function delete_file(\mysqli $conn, string $file, directory $dir, $from) : \result {
+			$file           = self::clean_filename($file);
 			$result         = new \result;
 			$file_full_path = $dir->get_file($file)->get_full_path();
 
@@ -196,7 +198,7 @@
 			}
 
 			if (is_dir($file_full_path)) {
-				$remove = rrmdir($file_full_path);
+				$remove = self::rrmdir($file_full_path);
 				$name   = 'Directory';
 				$type   = 'dir';
 			} else {
@@ -235,18 +237,21 @@
 			return $result;
 		}
 
-		public static function ignore_file(\mysqli $conn, string $file, directory $dir_stag, directory $dir_prod) : \result {
+		public static function ignore_file(\mysqli $conn, string $file, directory $dir_stag, directory $dir_prod, $type = null) : \result {
+			$file   = self::clean_filename($file);
 			$result = new \result;
 			$stmt   = "SELECT `id` from `staging_files_ignored` WHERE `file_path` = '$file'";
 			$query  = $conn->query($stmt);
 
 			if ($query->num_rows == 0) {
 
+				$dir_file = false;
+
 				if ($dir_file = $dir_stag->get_file($file))
 					$dir = $dir_stag;
 				elseif ($dir_file = $dir_prod->get_file($file))
 					$dir = $dir_prod;
-				else {
+				/*else {
 					$result
 						->set_success(false)
 						->set_msg('File <b>'.$file.'</b> does not exist on either staging or production.')
@@ -254,14 +259,28 @@
 						->set_data('type', 'error');
 
 					return $result;
-				}
+				}*/
 
-				if ($is_dir = $dir_file->is_dir()) {
-					$name = 'Directory';
-					$type = 'dir';
+				if ($dir_file) {
+					if ($is_dir = $dir_file->is_dir()) {
+						$name = 'Directory';
+						$type = 'dir';
+					} else {
+						$name = 'File';
+						$type = 'file';
+					}
 				} else {
-					$name = 'File';
-					$type = 'file';
+					switch ($type) {
+						default:
+						case 'file':
+							$name = 'File';
+							$type = 'file';
+							break;
+						case 'dir':
+							$name = 'Directory';
+							$type = 'dir';
+							break;
+					}
 				}
 
 				$stmt  = "
@@ -296,11 +315,12 @@
 		}
 
 		public static function unignore_file(\mysqli $conn, string $file) : \result {
+			$file   = self::clean_filename($file);
 			$result = new \result;
-			$stmt = "
+			$stmt   = "
 				DELETE FROM `staging_files_ignored`
 				WHERE `file_path` = '$file'";
-			$query = $conn->query($stmt);
+			$query  = $conn->query($stmt);
 
 			if ($query) {
 				$result
@@ -370,7 +390,8 @@
 		}
 
 		private static function add_to_push_table(\mysqli &$conn, $file, $type, $from, $deleted = false) {
-			$deleted = $deleted ? 'true' : 'false';
+			$file       = self::clean_filename($file);
+			$deleted    = $deleted ? 'true' : 'false';
 
 			$stmt = "
 				INSERT INTO `staging_files_pushed` 
@@ -381,5 +402,35 @@
 				    `deleted` = $deleted";
 
 			return $conn->query($stmt);
+		}
+
+		// recursively deletes directory
+		private static function rrmdir($dir) {
+			if (is_dir($dir)) {
+				$objects = scandir($dir);
+
+				foreach ($objects as $object) {
+					if ($object != '.' && $object != '..') {
+						if (is_dir($dir.DIRECTORY_SEPARATOR.$object) && !is_link($dir.'/'.$object))
+							self::rrmdir($dir.DIRECTORY_SEPARATOR.$object);
+						else {
+							$unlink = unlink($dir.DIRECTORY_SEPARATOR.$object);
+
+							if (!$unlink)
+								return false;
+						}
+					}
+				}
+
+				rmdir($dir);
+
+				return true;
+			}
+
+			return false;
+		}
+
+		public static function clean_filename($filename) {
+			return str_replace(['\\','/',':','*','"','\'','<','>','|'], '', $filename);
 		}
 	}

@@ -2,7 +2,12 @@
 	<thead>
 		<tr>
 			<td colspan="9999">
-				Ignored Files
+				Ignored Files & Directories
+
+                <div class="r">
+                    &nbsp;
+                    <input id="add_ignore" type="button" value="Add Ignore" />
+                </div>
 			</td>
 		</tr>
 	</thead>
@@ -22,6 +27,8 @@
 							<i class="icon fa fa-folder-open" aria-hidden="true"></i>
 						<? elseif ($file['type'] === 'file') : ?>
 							<i class="icon fa fa-file" aria-hidden="true"></i>
+                        <? else : ?>
+                            <i class="icon fa fa-question" aria-hidden="true" title="Ignore Manually Added"></i>
 						<? endif; ?>
 					</td>
                     <td style="width:1px;white-space:nowrap;">
