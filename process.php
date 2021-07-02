@@ -49,11 +49,11 @@
 					$push_result = \directory\deployment::push_file($conn, $file, $dir_from, $dir_to, $from);
 
 					if (!$push_result->is_success())
-						log_message_redirect($push_result->get_msg(), $push_result->get_data('type'), $push_result->get_data('title'), THIS_URL_FULL);
+						push_alert($push_result->get_msg(), $push_result->get_data('title'), $push_result->get_data('type'), THIS_URL_FULL);
 				}
 			}
 
-			log_message_redirect('All files and directories pushed successfully', 'success', 'Files Pushed', THIS_URL_FULL);
+			push_alert('All files and directories pushed successfully', 'Files Pushed', 'success', THIS_URL_FULL);
 		}
 
 		// sync staging
@@ -80,7 +80,7 @@
 					$push_result = \directory\deployment::push_file($conn, $file, $dir_from, $dir_to, $from);
 
 					if (!$push_result->is_success())
-						log_message_redirect($push_result->get_msg(), $push_result->get_data('type'), $push_result->get_data('title'), THIS_URL_FULL);
+						push_alert($push_result->get_msg(), $push_result->get_data('title'), $push_result->get_data('type'), THIS_URL_FULL);
 				} else {
 					// delete file
 
@@ -89,11 +89,11 @@
 					$delete_result = \directory\deployment::delete_file($conn, $file, $dir_to, 'stag');
 
 					if (!$delete_result->is_success())
-						log_message_redirect($delete_result->get_msg(), $delete_result->get_data('type'), $delete_result->get_data('title'), THIS_URL_FULL);
+						push_alert($delete_result->get_msg(), $delete_result->get_data('title'), $delete_result->get_data('type'), THIS_URL_FULL);
 				}
 			}
 
-			log_message_redirect('Staging synced with production successfully', 'success', 'Staging Synced', THIS_URL_FULL);
+			push_alert('Staging synced with production successfully', 'Staging Synced', 'success', THIS_URL_FULL);
 		}
 
 		// push all new and newer
@@ -119,11 +119,11 @@
 					$push_result = \directory\deployment::push_file($conn, $file, $dir_from, $dir_to, $from);
 
 					if (!$push_result->is_success())
-						log_message_redirect($push_result->get_msg(), $push_result->get_data('type'), $push_result->get_data('title'), THIS_URL_FULL);
+						push_alert($push_result->get_msg(), $push_result->get_data('title'), $push_result->get_data('type'), THIS_URL_FULL);
 				}
 			}
 
-			log_message_redirect('All files and directories pushed successfully', 'success', 'Files Pushed', THIS_URL_FULL);
+			push_alert('All files and directories pushed successfully', 'Files Pushed', 'success', THIS_URL_FULL);
 		}
 
 		// push
@@ -131,10 +131,10 @@
 		if ($_GET['act'] == 'push') {
 
 			if (!($file = $_GET['file']))
-				log_message_redirect('File not specified.', 'error', 'Error', THIS_URL_FULL);
+				push_alert('File not specified.', 'Error', 'error', THIS_URL_FULL);
 
 			if (!($from = $_GET['from']))
-				log_message_redirect('From parameter not specified.', 'error', 'Error', THIS_URL_FULL);
+				push_alert('From parameter not specified.', 'Error', 'error', THIS_URL_FULL);
 
 			if ($from == 'stag') {
 				$dir_from   = $dir_stag;
@@ -149,7 +149,7 @@
 
 			$push_result = \directory\deployment::push_file($conn, $file, $dir_from, $dir_to, $from);
 
-			log_message_redirect($push_result->get_msg(), $push_result->get_data('type'), $push_result->get_data('title'), THIS_URL_FULL);
+			push_alert($push_result->get_msg(), $push_result->get_data('title'), $push_result->get_data('type'), THIS_URL_FULL);
 		}
 
 		// delete
@@ -157,10 +157,10 @@
 		if ($_GET['act'] == 'delete') {
 
 			if (!($file = $_GET['file']))
-				log_message_redirect('File not specified.', 'error', 'Error', THIS_URL_FULL);
+				push_alert('File not specified.', 'Error', 'error', THIS_URL_FULL);
 
 			if (!($from = $_GET['from']))
-				log_message_redirect('From parameter not specified.', 'error', 'Error', THIS_URL_FULL);
+				push_alert('From parameter not specified.', 'Error', 'error', THIS_URL_FULL);
 
 			if ($from == 'stag')
 				$dir = $dir_stag;
@@ -171,7 +171,7 @@
 
 			$delete_file = \directory\deployment::delete_file($conn, $file, $dir, $from);
 
-			log_message_redirect($delete_file->get_msg(), $delete_file->get_data('type'), $delete_file->get_data('title'), THIS_URL_FULL);
+			push_alert($delete_file->get_msg(), $delete_file->get_data('title'), $delete_file->get_data('type'), THIS_URL_FULL);
 		}
 
 		// ignore
@@ -179,11 +179,11 @@
 		if ($_GET['act'] == 'ignore') {
 
 			if (!($file = $_GET['file']))
-				log_message_redirect('File not specified.', 'error', 'Error', THIS_URL_FULL);
+				push_alert('File not specified.', 'Error', 'error', THIS_URL_FULL);
 
 			$ignore_file = \directory\deployment::ignore_file($conn, $file, $dir_stag, $dir_prod);
 
-			log_message_redirect($ignore_file->get_msg(), $ignore_file->get_data('type'), $ignore_file->get_data('title'), THIS_URL_FULL);
+			push_alert($ignore_file->get_msg(), $ignore_file->get_data('title'), $ignore_file->get_data('type'), THIS_URL_FULL);
 		}
 
 		// uningore
@@ -191,15 +191,10 @@
 		if ($_GET['act'] == 'unignore') {
 
 			if (!($file = $_GET['file']))
-				log_message_redirect('File not specified.', 'error', 'Error', THIS_URL_FULL);
+				push_alert('File not specified.', 'Error', 'error', THIS_URL_FULL);
 
 			$unignore_file = \directory\deployment::unignore_file($conn, $file);
 
-			log_message_redirect($unignore_file->get_msg(), $unignore_file->get_data('type'), $unignore_file->get_data('title'), THIS_URL_FULL);
+			push_alert($unignore_file->get_msg(), $unignore_file->get_data('title'), $unignore_file->get_data('type'), THIS_URL_FULL);
 		}
-	}
-
-	if (isset($_SESSION['log_msg'])) {
-		log_message($_SESSION['log_msg']['text'], $_SESSION['log_msg']['type'], $_SESSION['log_msg']['title']);
-		unset($_SESSION['log_msg']);
 	}

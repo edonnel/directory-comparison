@@ -1,5 +1,9 @@
+<meta name="csrf-token" content="<?= $_SESSION['csrf_token'] ?>">
+
 <style>
-	<? require_once(THIS_DIR.'/src/css/style.css') ?>
+    <? require_once THIS_DIR.'/src/css/fontawesome.v4.7.0.css'; ?>
+	<? require_once THIS_DIR.'/src/css/style.css'; ?>
+    <? require_once THIS_DIR.'/src/css/modal.css'; ?>
 </style>
 
 <div class="ca title_box" style="margin-bottom:0;">
@@ -17,7 +21,7 @@
     </div>
 </div>
 
-<? show_messages(); ?>
+<?= get_alerts(); ?>
 
 &nbsp;
 
@@ -39,4 +43,15 @@
     &nbsp;
 
     <div id="listing_files_pushed"></div>
+
+    &nbsp;
+
+    <? require_once THIS_DIR.'/view/notes.php' ?>
 </div>
+
+<? require_once THIS_DIR.'/view/modal_ignore.php' ?>
+
+<script>
+    <? require_once THIS_DIR.'/src/js/modal.js'; ?>
+    <? require_once THIS_DIR.'/src/js/javascript.js.php'; ?>
+</script>
