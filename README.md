@@ -27,3 +27,4 @@ if (session_status() === PHP_SESSION_NONE)
 - upgrade to SVG and stop using FontAwesome
 - make branch with `extra.php`
 - add db config, /uploads, /image to EWS branch
+- check for exec permissions
