@@ -4,6 +4,8 @@
 
 .table.condensed tbody td { padding:5px 12px; }
 
+.table, table { border-radius:4px; overflow:hidden; }
+
 table { width:100%; }
 table tr.diff { background-color:#ffffe8; }
 table tr.diff:hover { background-color:#f8f8e2; }
@@ -51,6 +53,20 @@ table tr.no:hover { background-color:#ececec; }
 
 table tr.no td:first-child,
 table tr.no td:nth-child(2) { text-decoration:line-through; }
+
+.load-more {
+    display:inline-block;
+    background-color:white;
+    color:#282828;
+    cursor:pointer;
+    line-height:1;
+    text-align:center;
+    margin:15px auto 0 auto;
+    border-radius:5px;
+    box-shadow:2px 2px 7px rgba(0,0,0,0.1);
+}
+.load-more .fa { padding:10px; }
+.load-more:hover { background-color:#2369A3; color:white; }
 
 .push-link {
     text-decoration:none !important;
@@ -202,7 +218,7 @@ table.right .push-link::before { font-size:18px; line-height:0; }
     border:solid 1px #cccccc;
     padding:10px;
     border-radius:4px;
-    font-size:16px;
+    font-size:15px;
     transition:all 0.2s;
     min-height:150px;
 }

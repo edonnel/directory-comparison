@@ -92,11 +92,13 @@
 				return 0;
 		}
 
-		public static function get_directory_changes(directory $directory, directory $directory_other, $all_files = false) : \changes {
+		public static function get_directory_changes(directory $directory, directory $directory_other, $all_files = false, $limit = LIMIT_FILES, $start = 0) : \changes {
 			if (!$all_files)
 				$all_files = self::combine_directories($directory, $directory_other);
 
 			$changes = new \changes();
+
+			$i = 0;
 
 			foreach ($all_files as $file_path) {
 
@@ -129,8 +131,22 @@
 						->add_reason('dne');
 				}
 
-				if (!$dont_add)
+				if (!$dont_add) {
+					$change->set_data('i', $i); // mark for removal. doesn't do anything productive.
+
+					if ($i < $start) {
+						$start--;
+
+						continue;
+					}
+
 					$changes->add($change);
+
+					$i++;
+				}
+
+				if ($i >= $limit)
+					break;
 			}
 
 			return $changes;

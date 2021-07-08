@@ -16,8 +16,8 @@
 
 		require_once __DIR__.'/src/php/directory.class.php';
 		require_once __DIR__.'/src/php/deployment.class.php';
-		require_once dirname(THIS_DIR).'/_src/php/result.class.php';
-		require_once dirname(THIS_DIR).'/_src/php/changes.class.php';
+		require_once __DIR__.'/src/php/result.class.php';
+		require_once __DIR__.'/src/php/changes.class.php';
 
 		$files_to_exclude = \directory\deployment::get_ignored_files($conn, null, null, false);
 
@@ -198,3 +198,17 @@
 			push_alert($unignore_file->get_msg(), $unignore_file->get_data('title'), $unignore_file->get_data('type'), THIS_URL_FULL);
 		}
 	}
+
+	// check directory exists
+
+	if (!file_exists(PATH_PROD))
+		push_alert('Production directory <span style="font-family:monospace;">'.DIR_PROD.'</span> does not exist.', 'Directory Error', 'error');
+
+
+	if (!file_exists(PATH_STAG))
+		push_alert('Staging directory <span style="font-family:monospace;">'.DIR_STAG.'</span> does not exist.', 'Directory Error', 'error', false, true);
+
+	// check exec allowed
+
+	if (@exec('echo EXEC') != 'EXEC')
+		push_alert('<span style="font-family:monospace;">exec()</span> is not allowed or has been disabled. Most functions will not work properly.', 'Warning', 'warning', false, true);

@@ -431,6 +431,6 @@
 		}
 
 		public static function clean_filename($filename) {
-			return str_replace(['\\','/',':','*','"','\'','<','>','|'], '', $filename);
+			return str_replace(['\\',':','*','"','\'','<','>','|'], '', $filename);
 		}
 	}

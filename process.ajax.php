@@ -1,4 +1,6 @@
 <?
+	header('Content-Type: application/json');
+
 	session_start();
 
 	ini_set('display_errors', 1);
@@ -6,14 +8,18 @@
 	if (!defined('BASE_DIR'))
 		define('BASE_DIR', dirname(__DIR__));
 
-	require_once __DIR__.'/_config.php';
+	if (file_exists(__DIR__.'/DEVMACHINE'))
+		require_once __DIR__.'/_config_dev.php';
+	else
+		require_once __DIR__.'/_config.php';
+
 	require_once __DIR__.'/src/php/extra.php';
 	require_once __DIR__.'/src/php/functions.php';
 	require_once __DIR__.'/src/php/directory.class.php';
 	require_once __DIR__.'/src/php/deployment.class.php';
+	require_once __DIR__.'/src/php/result.class.php';
+	require_once __DIR__.'/src/php/changes.class.php';
 	require_once __DIR__.'/globals.php';
-	require_once dirname(THIS_DIR).'/_src/php/result.class.php';
-	require_once dirname(THIS_DIR).'/_src/php/changes.class.php';
 
 	$validate_csrf = validate_csrf();
 
@@ -58,7 +64,22 @@
 
 			$all_files = directory\directory::combine_directories($dir_stag, $dir_prod);
 
-			$html = listing($dir_from, $dir_to, $all_files, $header, $from, $position);
+			if (isset($_GET['limit']) && is_integer($_GET['limit']))
+				$limit = $_GET['limit'];
+			else
+				$limit = LIMIT_FILES;
+
+			if (isset($_GET['start']) && $_GET['start'])
+				$start = $_GET['start'];
+			else
+				$start = 0;
+
+			if (isset($_GET['just_rows']))
+				$just_rows = $_GET['just_rows'];
+			else
+				$just_rows = false;
+
+			$html = listing($dir_from, $dir_to, $all_files, $header, $from, $position, $limit, $start, $just_rows);
 
 			$result
 				->set_success(true)
