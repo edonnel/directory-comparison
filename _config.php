@@ -1,6 +1,8 @@
 <?
-	const DIR_PROD = 'ed.localhost/admin/modules/staging/files/comparison_test/prod';
-	const DIR_STAG = 'ed.localhost/admin/modules/staging/files/comparison_test/stag';
+	const DIR_PROD = '';
+	const DIR_STAG = '';
+
+	const LIMIT_FILES = 50;
 
 	const DB_CRED_CALLBACK  = 'db_cred_callback';
 

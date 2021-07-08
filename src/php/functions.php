@@ -1,12 +1,12 @@
 <?
-	function listing(\directory\directory $directory, \directory\directory $directory_other, $all_files, $header, $from, $position) {
+	function listing(\directory\directory $directory, \directory\directory $directory_other, $all_files, $header, $from, $position, $limit = LIMIT_FILES, $start = 0, $just_rows = false) {
 		if ($from != 'stag' && $from != 'prod')
 			$from = 'stag';
 
 		if ($position != 'left' && $position != 'right')
 			$position = 'left';
 
-		$changed_files = \directory\directory::get_directory_changes($directory, $directory_other, $all_files);
+		$changed_files = \directory\directory::get_directory_changes($directory, $directory_other, $all_files, $limit, $start);
 		$changed_files = $changed_files->get();
 
 		$allow_push = false;
@@ -16,12 +16,36 @@
 				$allow_push = true;
 		}
 
-		return require_return(THIS_DIR.'/view/files.php', array(
-			'changed_files' => $changed_files,
-			'header'        => $header,
-			'from'          => $from,
-			'position'      => $position,
-			'allow_push'    => $allow_push,
+		$output = '';
+
+		if (!$just_rows) {
+			$output = require_return(THIS_DIR.'/view/files.php', array(
+				'changed_files' => $changed_files,
+				'header'        => $header,
+				'from'          => $from,
+				'position'      => $position,
+				'allow_push'    => $allow_push,
+			));
+		} else
+			$output .= listing_rows($changed_files);
+
+		return $output;
+	}
+
+	// returns HTML output of just rows
+	function listing_rows(array $changed_files) {
+		$output = '';
+
+		foreach ($changed_files as $changed_file)
+			$output .= listing_row($changed_file);
+
+		return $output;
+	}
+
+	// returns output of one row
+	function listing_row(change $changed_file) {
+		return require_return(THIS_DIR.'/view/partials/files_row.php', array(
+			'changed_file' => $changed_file,
 		));
 	}
 
@@ -65,14 +89,15 @@
 		echo '</div>';
 	}
 
-	function push_alert($text, $title = '', $type = 'alert', $redirect = false) {
+	function push_alert($text, $title = '', $type = 'alert', $redirect = false, $critical = false) {
 		if (!is_array($_SESSION['ed_alerts']) || !isset($_SESSION['ed_alerts']))
 			$_SESSION['ed_alerts'] = array();
 
 		array_push($_SESSION['ed_alerts'], array(
-			'text'  => $text,
-			'title' => $title,
-			'type'  => $type,
+			'text'      => $text,
+			'title'     => $title,
+			'type'      => $type,
+			'critical'  => $critical,
 		));
 
 		if ($redirect) {
@@ -113,6 +138,15 @@
 		}
 
 		return $output;
+	}
+
+	function alerts_are_critical() {
+		foreach ($_SESSION['ed_alerts'] as $alert) {
+			if (isset($alert['critical']) && $alert['critical'])
+				return true;
+		}
+
+		return false;
 	}
 
 	// returns content of file

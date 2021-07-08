@@ -3,6 +3,8 @@ const THIS_DIR      = '<?= THIS_DIR ?>';
 const THIS_URL_DIR  = '<?= THIS_URL_DIR ?>';
 const PROCESS_URL   = THIS_URL_DIR+'/process.ajax.php';
 const a             = '<?= $_GET['a'] ?>';
+const loader_class  = 'loader';
+const FILES_LIMIT   = <?= LIMIT_FILES ?>;
 
 function load_jquery(method, wait, waited) {
     const timeout = 50;
@@ -88,7 +90,74 @@ function get_listing_files(from, elem) {
             else
                 $(elem).html(result.msg);
         },
-    })
+    });
+}
+
+function get_listing_files_more(start) {
+    show_loading('#listing_files_stag');
+    show_loading('#listing_files_prod');
+
+    const data = {
+        act:'get_listing_files',
+        a:a,
+        start:start,
+        just_rows:true,
+    };
+
+    let load_more = function(elem, data, from) {
+
+        data.from = from;
+
+        $.ajax({
+            url:PROCESS_URL,
+            type:'GET',
+            dataType:'json',
+            data:data,
+            success:function(result) {
+                if (result.success) {
+                    $(elem).find('table tbody').first().append(result.data.html);
+
+                    // if no result, hide button
+                    if (!result.data.html)
+                        $('#load_more_files').hide();
+                } else
+                    alert(result.msg);
+
+                hide_loading(elem);
+            },
+        });
+
+    };
+
+    load_more('#listing_files_stag', data, 'stag');
+    load_more('#listing_files_prod', data, 'prod');
+}
+
+function check_listing_files_more(start) {
+    if (!start && start !== 0)
+        start = get_i();
+
+    $.ajax({
+        url:PROCESS_URL,
+        type:'GET',
+        dataType:'json',
+        data:{
+            act:'get_listing_files',
+            a:a,
+            start:start,
+            just_rows:true,
+            from:'stag',
+        },
+        success:function(result) {
+            if (result.success) {
+                if (!result.data.html)
+                    $('#load_more_files').hide();
+                else
+                    $('#load_more_files').show();
+            } else
+                alert(result.msg);
+        },
+    });
 }
 
 function get_listing_files_all() {
@@ -115,7 +184,7 @@ function get_listing_ignored() {
             else
                 $(elem).html(result.msg);
         },
-    })
+    });
 }
 
 function get_listing_pushed(pag) {
@@ -141,7 +210,7 @@ function get_listing_pushed(pag) {
             else
                 $(elem).html(result.msg);
         },
-    })
+    });
 }
 
 function push_file(file, from) {
@@ -288,10 +357,9 @@ function show_loading(elem) {
     };
 
     const transition_time   = 750;
-    const loader_class      = 'loader';
     const loader_selector   = elem+' .'+loader_class;
 
-    let $html = $('<div></div>')
+    let $html = $('<div class="'+loader_class+'-container"></div>')
         .css({
             'position':'absolute',
             'display':'flex',
@@ -316,6 +384,15 @@ function show_loading(elem) {
     animate(loader_selector);
 }
 
+function hide_loading(elem) {
+    $(elem).find('.'+loader_class+'-container').remove();
+}
+
+// get pagination of files (starting index)
+function get_i() {
+    return parseInt($('#load_more_files').attr('data-i'));
+}
+
 load_jquery(function() {
 
     const CSRF_TOKEN    = $('meta[name="csrf-token"]').attr('content');
@@ -329,6 +406,7 @@ load_jquery(function() {
     $(function() {
         get_listing_all();
 
+        // on refresh
         $('#refresh').on('click', function() {
             const $refresh = $(this);
             const transition_time = 500;
@@ -346,7 +424,14 @@ load_jquery(function() {
             }, transition_time);
 
             get_listing_all();
+
+            $('#load_more_files').attr('data-i', FILES_LIMIT);
+
+            check_listing_files_more();
         });
+
+        // check to see if load more
+        check_listing_files_more();
     });
 
     $(document).on('click', '#pag_pushed .pag-first', function() {
@@ -452,6 +537,17 @@ load_jquery(function() {
         const notes = $('#notes').val();
 
         save_notes(notes);
+    });
+
+    $('#load_more_files').on('click', function() {
+        const i         = get_i();
+        const next_i    = i + FILES_LIMIT;
+
+        get_listing_files_more(i);
+
+        $('#load_more_files').attr('data-i', next_i);
+
+        check_listing_files_more(next_i);
     });
 
 });
