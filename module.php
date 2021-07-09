@@ -12,7 +12,9 @@
 	if (!DIR_PROD || !DIR_STAG)
 		die('Please set directories to compare.');
 
-	require_once __DIR__.'/src/php/extra.php';
+	if (file_exists(__DIR__.'/src/php/extra.php'))
+		require_once __DIR__.'/src/php/extra.php';
+
 	require_once __DIR__.'/src/php/functions.php';
 	require_once __DIR__.'/globals.php';
 
