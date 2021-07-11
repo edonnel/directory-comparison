@@ -4,7 +4,7 @@
 
 	const LIMIT_FILES = 50;
 
-	const DB_CRED_CALLBACK  = 'db_cred_callback';
+	const DB_CRED_CALLBACK  = '';
 
 	const DB_HOST = '';
 	const DB_USER = '';
