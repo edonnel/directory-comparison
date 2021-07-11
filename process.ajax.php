@@ -13,9 +13,7 @@
 	else
 		require_once __DIR__.'/_config.php';
 
-	if (file_exists(__DIR__.'/src/php/extra.php'))
-		require_once __DIR__.'/src/php/extra.php';
-
+	require_once __DIR__.'/src/php/extra.php';
 	require_once __DIR__.'/src/php/functions.php';
 	require_once __DIR__.'/src/php/directory.class.php';
 	require_once __DIR__.'/src/php/deployment.class.php';
