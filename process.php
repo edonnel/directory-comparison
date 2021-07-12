@@ -14,10 +14,10 @@
 
 	if (isset($_GET['act']) && in_array($_GET['act'], $valid_acts)) {
 
-		require_once __DIR__.'/src/php/directory.class.php';
-		require_once __DIR__.'/src/php/deployment.class.php';
-		require_once __DIR__.'/src/php/result.class.php';
-		require_once __DIR__.'/src/php/changes.class.php';
+		require_once __DIR__.'/src/php/classes/directory.class.php';
+		require_once __DIR__.'/src/php/classes/deployment.class.php';
+		require_once __DIR__.'/src/php/classes/result.class.php';
+		require_once __DIR__.'/src/php/classes/changes.class.php';
 
 		$files_to_exclude = \directory\deployment::get_ignored_files($conn, null, null, false);
 
