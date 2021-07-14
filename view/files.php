@@ -32,7 +32,7 @@
             <td class="category"></td>
 		</tr>
 		<? if ($changed_files) : ?>
-			<?= listing_rows($changed_files) ?>
+			<?= listing_rows($changed_files, $from) ?>
 		<? else : ?>
 			<tr>
 				<td colspan="9999"><i>No changed files.</i></td>

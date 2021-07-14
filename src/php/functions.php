@@ -21,31 +21,32 @@
 		if (!$just_rows) {
 			$output = require_return(THIS_DIR.'/view/files.php', array(
 				'changed_files' => $changed_files,
-				'header'        => $header,
 				'from'          => $from,
+				'header'        => $header,
 				'position'      => $position,
 				'allow_push'    => $allow_push,
 			));
 		} else
-			$output .= listing_rows($changed_files);
+			$output .= listing_rows($changed_files, $from);
 
 		return $output;
 	}
 
 	// returns HTML output of just rows
-	function listing_rows(array $changed_files) {
+	function listing_rows(array $changed_files, $from) {
 		$output = '';
 
 		foreach ($changed_files as $changed_file)
-			$output .= listing_row($changed_file);
+			$output .= listing_row($changed_file, $from);
 
 		return $output;
 	}
 
 	// returns output of one row
-	function listing_row(change $changed_file) {
+	function listing_row(change $changed_file, $from) {
 		return require_return(THIS_DIR.'/view/partials/files_row.php', array(
-			'changed_file' => $changed_file,
+			'from'          => $from,
+			'changed_file'  => $changed_file,
 		));
 	}
 
