@@ -4,9 +4,10 @@
 	if (session_status() === PHP_SESSION_NONE)
 		session_start();
 
-	if (file_exists(__DIR__.'/DEVMACHINE'))
-		require_once __DIR__.'/_config_dev.php';
-	else
+	if (file_exists(__DIR__.'/DEVMACHINE')) {
+		require_once __DIR__.'/_dev/_config.php';
+		require_once __DIR__.'/_dev/functions.php';
+	} else
 		require_once __DIR__.'/_config.php';
 
 	if (!DIR_PROD || !DIR_STAG)
