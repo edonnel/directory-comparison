@@ -1,0 +1,6 @@
+[submodule "lib/result"]
+	path = lib/result
+	url = git://github.com/edonnel/result.class.php
+[submodule "lib/changes"]
+	path = lib/changes
+	url = git://github.com/edonnel/changes.class.php

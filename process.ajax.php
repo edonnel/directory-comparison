@@ -17,8 +17,8 @@
 	require_once __DIR__.'/src/php/functions.php';
 	require_once __DIR__.'/src/php/classes/directory.class.php';
 	require_once __DIR__.'/src/php/classes/deployment.class.php';
-	require_once __DIR__.'/src/php/classes/result.class.php';
-	require_once __DIR__.'/src/php/classes/changes.class.php';
+	require_once __DIR__.'/lib/result/result.class.php';
+	require_once __DIR__.'/lib/changes/changes.class.php';
 	require_once __DIR__.'/globals.php';
 
 	$validate_csrf = validate_csrf();
