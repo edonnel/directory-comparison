@@ -16,8 +16,8 @@
 
 		require_once __DIR__.'/src/php/classes/directory.class.php';
 		require_once __DIR__.'/src/php/classes/deployment.class.php';
-		require_once __DIR__.'/src/php/classes/result.class.php';
-		require_once __DIR__.'/src/php/classes/changes.class.php';
+		require_once __DIR__.'/lib/result/result.class.php';
+		require_once __DIR__.'/lib/changes/changes.class.php';
 
 		$files_to_exclude = \directory\deployment::get_ignored_files($conn, null, null, false);
 
