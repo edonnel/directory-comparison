@@ -4,7 +4,7 @@ Tool for comparing directories and pushing certain (or all) files from staging t
 
 ## Installation
 
-Installation is pretty simple. It requires very little configuration.
+Installation is pretty simple. It requires very little configuration. 
 
 1. Download the latest release
 2. Edit the configuration file. See the <a href="https://github.com/edonnel/staging-directory-comparison/wiki#configuration">wiki</a> 
