@@ -8,11 +8,13 @@
 	if (!defined('BASE_DIR'))
 		define('BASE_DIR', dirname(__DIR__));
 
-	if (file_exists(__DIR__.'/DEVMACHINE')) {
-		require_once __DIR__.'/_dev/_config.php';
-		require_once __DIR__.'/_dev/functions.php';
-	} else
+	if (file_exists(__DIR__.'/_config_custom.php'))
+		require_once __DIR__.'/_config_custom.php';
+	else
 		require_once __DIR__.'/_config.php';
+
+	if (file_exists(__DIR__.'/src/php/functions_custom.php'))
+		require_once __DIR__.'/src/php/functions_custom.php';
 
 	require_once __DIR__.'/src/php/extra.php';
 	require_once __DIR__.'/src/php/functions.php';
