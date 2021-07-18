@@ -15,18 +15,6 @@
 		),
 		'insert'  => array(
 			array(
-				'file_path' => '/image',
-				'type'      => 'dir',
-			),
-			array(
-				'file_path' => '/uploads',
-				'type'      => 'dir',
-			),
-			array(
-				'file_path' => '/admin/modules/staging',
-				'type'      => 'dir',
-			),
-			array(
 				'file_path' => '/.htaccess',
 				'type'      => 'file',
 			),
