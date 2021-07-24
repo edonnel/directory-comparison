@@ -9,5 +9,5 @@
 		install_the_tables($conn, $tables);
 
 		if (!file_exists(THIS_DIR.'/DEVMACHINE'))
-			rmdir(__DIR__.'/install');
+			rmdir(dirname(__DIR__).'/install');	// TODO RECURSIVE DELETE
 	}
