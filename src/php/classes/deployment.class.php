@@ -251,15 +251,6 @@
 					$dir = $dir_stag;
 				elseif ($dir_file = $dir_prod->get_file($file))
 					$dir = $dir_prod;
-				/*else {
-					$result
-						->set_success(false)
-						->set_msg('File <b>'.$file.'</b> does not exist on either staging or production.')
-						->set_data('title', 'Error Ignoring')
-						->set_data('type', 'error');
-
-					return $result;
-				}*/
 
 				if ($dir_file) {
 					if ($is_dir = $dir_file->is_dir()) {
@@ -340,7 +331,7 @@
 		}
 
 		public static function backup_changes(\changes $changes) {
-			$changes                = $changes->get();
+			$changes                    = $changes->get();
 			$backup_dir_name            = THIS_DIR.'/backup';
 			$backup_dir_new_name        = date('m-d-Y_h-i-s');
 			$backup_dir_new_full_name   = $backup_dir_name.'/'.$backup_dir_new_name;
@@ -348,45 +339,51 @@
 			if (!file_exists($backup_dir_name))
 				mkdir($backup_dir_name, 0755);
 
-			mkdir($backup_dir_new_full_name, 0755);
+			$zip = new \ZipArchive();
 
-			foreach ($changes as $change) {
-				$file           = $change->get_object();
-				$file_name      = $file->get_path();
-				$full_file_name = $file->get_full_path();
+			if ($zip->open($backup_dir_new_full_name.'.zip', \ZipArchive::CREATE | \ZipArchive::OVERWRITE) === TRUE) {
 
-				$new_file_name = $backup_dir_new_full_name.'/'.$file_name;
+				foreach ($changes as $change) {
 
-				self::backup_file($full_file_name, $new_file_name);
-			}
+					if ($file = $change->get_object_other()) {
 
-			shell_exec('tar -C '.dirname($backup_dir_new_full_name).'/ -czvf "'.$backup_dir_new_full_name.'.tgz" "'.$backup_dir_new_name.'" && rm -R "'.$backup_dir_new_full_name.'"');
+						if (!$file->is_dir()) {
+							$full_file_name = $file->get_full_path();
+							$new_file_name  = str_replace(ACCOUNT_ROOT, '', $full_file_name);
+
+							$zip->addFile($full_file_name, $new_file_name);
+						}
+					}
+				}
+
+				$zip->close();
+
+				return true;
+			} else
+				return false;
 		}
 
-		public static function backup_file($file_path, $_new_file_name = false) {
-			if (!$_new_file_name) {
-				$file_name                  = basename($file_path);
-				$backup_dir_name            = THIS_DIR.'/backup';
-				$backup_dir_new_name        = date('m-d-Y_h-i-s');
-				$backup_dir_new_full_name   = $backup_dir_name.'/'.$backup_dir_new_name;
-				$new_file_name              = $backup_dir_new_full_name.'/'.$file_name;
+		public static function backup_file($file_path) {
+			$backup_dir_name            = THIS_DIR.'/backup';
+			$backup_dir_new_name        = date('m-d-Y_h-i-s');
+			$backup_dir_new_full_name   = $backup_dir_name.'/'.$backup_dir_new_name;
 
-				if (!file_exists($backup_dir_name))
-					mkdir($backup_dir_name, 0755);
+			if (!file_exists($backup_dir_name))
+				mkdir($backup_dir_name, 0755);
 
-				mkdir($backup_dir_new_full_name, 0755);
+			$zip = new \ZipArchive();
+
+			if ($zip->open($backup_dir_new_full_name.'.zip', \ZipArchive::CREATE | \ZipArchive::OVERWRITE) === TRUE) {
+
+				$new_file_name = str_replace(ACCOUNT_ROOT, '', $file_path);
+
+				$zip->addFile($file_path, $new_file_name);
+
+				$zip->close();
+
+				return true;
 			} else
-				$new_file_name = $_new_file_name;
-
-			if (is_dir($file_path)) {
-				if (!file_exists($new_file_name))
-					shell_exec('cp -r "'.$file_path.'" "'.$new_file_name.'"');
-			} else
-				copy($file_path, $new_file_name);
-
-			if (!$_new_file_name) {
-				shell_exec('tar -C '.dirname($backup_dir_new_full_name).'/ -czvf "'.$backup_dir_new_full_name.'.tgz" "'.$backup_dir_new_name.'" && rm -R "'.$backup_dir_new_full_name.'"');
-			}
+				return false;
 		}
 
 		private static function add_to_push_table(\mysqli &$conn, $file, $type, $from, $deleted = false) {

@@ -38,7 +38,10 @@
 			$changed_files  = $changes->get();
 			$files          = array();
 
-			\directory\deployment::backup_changes($changes);
+			$backup = \directory\deployment::backup_changes($changes);
+
+			if (!$backup)
+				push_alert('Files and directories not pushed. Could not create backup zip file.', 'Files Not Pushed', 'error', THIS_URL_FULL);
 
 			foreach ($changed_files as $changed_file) {
 
@@ -54,6 +57,7 @@
 			}
 
 			push_alert('All files and directories pushed successfully', 'Files Pushed', 'success', THIS_URL_FULL);
+
 		}
 
 		// sync staging
@@ -207,8 +211,3 @@
 
 	if (!file_exists(PATH_STAG))
 		push_alert('Staging directory <span style="font-family:monospace;">'.DIR_STAG.'</span> does not exist.', 'Directory Error', 'error', false, true);
-
-	// check exec allowed
-
-	if (@exec('echo EXEC') != 'EXEC')
-		push_alert('<span style="font-family:monospace;">exec()</span> is not allowed or has been disabled. Most functions will not work properly.', 'Warning', 'warning', false, true);
