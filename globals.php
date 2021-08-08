@@ -1,5 +1,6 @@
 <?
-	const THIS_DIR = __DIR__;
+	if (!defined('THIS_DIR'))
+		define('THIS_DIR', __DIR__);
 
 	define('DOCUMENT_ROOT', $_SERVER['DOCUMENT_ROOT']);
 	define('REAL_ROOT', realpath($_SERVER['DOCUMENT_ROOT']));

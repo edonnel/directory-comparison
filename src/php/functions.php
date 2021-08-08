@@ -230,3 +230,21 @@
 		else
 			return $conn;
 	}
+
+	function load_config() {
+		$ini = parse_ini_file(THIS_DIR.'/_config.ini', true);
+
+		if (file_exists(THIS_DIR.'/_config_custom.ini')) {
+			$ini_custom = parse_ini_file(THIS_DIR.'/_config_custom.ini', true);
+			$ini        = array_replace_recursive($ini, $ini_custom);
+		}
+
+		define('LIMIT_FILES', $ini['limit_files']);
+		define('DB_CRED_CALLBACK', $ini['db_cred_callback']);
+		define('DIR_PROD', $ini['directory']['prod']);
+		define('DIR_STAG', $ini['directory']['stag']);
+		define('DB_HOST', $ini['database']['host']);
+		define('DB_USER', $ini['database']['user']);
+		define('DB_PASS', $ini['database']['pass']);
+		define('DB_NAME', $ini['database']['name']);
+	}
