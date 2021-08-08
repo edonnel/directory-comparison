@@ -1,2 +1,2 @@
-_config_custom.php merge=ours
+_config_custom.ini merge=ours
 src/php/functions_custom.php merge=ours
