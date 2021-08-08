@@ -1,28 +1,32 @@
 <?
+	ini_set('display_errors', 1);
+
+	define('THIS_DIR', dirname(__DIR__));
+
 	header('Content-Type: application/json');
 
 	session_start();
 
-	ini_set('display_errors', 1);
+	// load functions
+	require_once THIS_DIR.'/src/php/functions.php';
 
-	if (!defined('BASE_DIR'))
-		define('BASE_DIR', dirname(__DIR__));
+	// load function functions
+	if (file_exists(THIS_DIR.'/src/php/functions_custom.php'))
+		require_once THIS_DIR.'/src/php/functions_custom.php';
 
-	if (file_exists(__DIR__.'/_config_custom.php'))
-		require_once __DIR__.'/_config_custom.php';
-	else
-		require_once __DIR__.'/_config.php';
+	// load config
+	load_config();
 
-	if (file_exists(__DIR__.'/src/php/functions_custom.php'))
-		require_once __DIR__.'/src/php/functions_custom.php';
+	// load classes
+	require_once THIS_DIR.'/src/php/classes/directory.class.php';
+	require_once THIS_DIR.'/src/php/classes/deployment.class.php';
+	require_once THIS_DIR.'/lib/result/result.class.php';
+	require_once THIS_DIR.'/lib/changes/changes.class.php';
 
-	require_once __DIR__.'/src/php/functions.php';
-	require_once __DIR__.'/src/php/classes/directory.class.php';
-	require_once __DIR__.'/src/php/classes/deployment.class.php';
-	require_once __DIR__.'/lib/result/result.class.php';
-	require_once __DIR__.'/lib/changes/changes.class.php';
-	require_once __DIR__.'/globals.php';
+	// load globals
+	require_once THIS_DIR.'/globals.php';
 
+	// security
 	$validate_csrf = validate_csrf();
 
 	if (!$validate_csrf['success']) {
@@ -101,7 +105,7 @@
 
 		$page = isset($_GET['pag']) && $_GET['pag'] ? $_GET['pag'] : 1;
 
-	    $html = listing_pushed($conn, $page);
+		$html = listing_pushed($conn, $page);
 
 		$result
 			->set_success(true)

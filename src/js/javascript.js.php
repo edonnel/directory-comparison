@@ -1,7 +1,7 @@
 const THIS_URL      = '<?= THIS_URL ?>';
 const THIS_DIR      = '<?= THIS_DIR ?>';
 const THIS_URL_DIR  = '<?= THIS_URL_DIR ?>';
-const PROCESS_URL   = THIS_URL_DIR+'/process.ajax.php';
+const PROCESS_URL   = THIS_URL_DIR+'/process/';
 const a             = '<?= $_GET['a'] ?>';
 const loader_class  = 'loader';
 const FILES_LIMIT   = <?= LIMIT_FILES ?>;
