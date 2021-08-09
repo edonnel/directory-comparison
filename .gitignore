@@ -6,3 +6,4 @@
 /_dev/
 /src/php/functions_custom.php
 /_config_custom.ini
+/_config_dev.ini

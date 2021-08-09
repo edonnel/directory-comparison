@@ -234,8 +234,15 @@
 	function load_config() {
 		$ini = parse_ini_file(THIS_DIR.'/_config.ini', true);
 
+		// load custom config
 		if (file_exists(THIS_DIR.'/_config_custom.ini')) {
 			$ini_custom = parse_ini_file(THIS_DIR.'/_config_custom.ini', true);
+			$ini        = array_replace_recursive($ini, $ini_custom);
+		}
+
+		// load dev config
+		if (file_exists(THIS_DIR.'/_config_dev.ini') && file_exists(THIS_DIR.'/DEVMACHINE')) {
+			$ini_custom = parse_ini_file(THIS_DIR.'/_config_dev.ini', true);
 			$ini        = array_replace_recursive($ini, $ini_custom);
 		}
 
