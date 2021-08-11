@@ -142,9 +142,11 @@
 	}
 
 	function alerts_are_critical() {
-		foreach ($_SESSION['ed_alerts'] as $alert) {
-			if (isset($alert['critical']) && $alert['critical'])
-				return true;
+		if (isset($_SESSION['ed_alerts']) && $_SESSION['ed_alerts']) {
+			foreach ($_SESSION['ed_alerts'] as $alert) {
+				if (isset($alert['critical']) && $alert['critical'])
+					return true;
+			}
 		}
 
 		return false;
@@ -197,10 +199,17 @@
 
 		$headers = apache_request_headers();
 
-		if (isset($headers['CsrfToken'])) {
-			if (!hash_equals($headers['CsrfToken'], $_SESSION['csrf_token'])) {
-				$return['success']  = false;
-				$return['msg']      = 'Wrong CSRF token.';
+		if (isset($headers['Csrftoken']))
+			$csrf_token = $headers['Csrftoken'];
+		elseif (isset($headers['CsrfToken']))
+			$csrf_token = $headers['CsrfToken'];
+		else
+			$csrf_token = false;
+		
+		if ($csrf_token) {
+			if (!hash_equals($csrf_token, $_SESSION['csrf_token'])) {
+				$return['success'] = false;
+				$return['msg']     = 'Wrong CSRF token.';
 			} else
 				$return['success'] = true;
 		} else {

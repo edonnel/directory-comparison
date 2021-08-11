@@ -7,10 +7,6 @@
 	if (session_status() === PHP_SESSION_NONE)
 		session_start();
 
-	// directories not set
-	if (!DIR_PROD || !DIR_STAG)
-		die('Please set directories to compare.');
-
 	// load functions
 	require_once THIS_DIR.'/src/php/functions.php';
 
@@ -20,6 +16,10 @@
 
 	// load config
 	load_config();
+
+	// directories not set
+	if (!DIR_PROD || !DIR_STAG)
+		die('Please set directories to compare.');
 
 	// load globals
 	require_once THIS_DIR.'/globals.php';

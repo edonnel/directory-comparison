@@ -90,6 +90,9 @@ function get_listing_files(from, elem) {
             else
                 $(elem).html(result.msg);
         },
+		error: function (jqXhr, textStatus, errorMessage) {
+			console.error(errorMessage);
+		},
     });
 }
 
@@ -125,6 +128,9 @@ function get_listing_files_more(start) {
 
                 hide_loading(elem);
             },
+			error: function (jqXhr, textStatus, errorMessage) {
+				console.error(errorMessage);
+			},
         });
 
     };
@@ -157,6 +163,9 @@ function check_listing_files_more(start) {
             } else
                 alert(result.msg);
         },
+		error: function (jqXhr, textStatus, errorMessage) {
+			console.error(errorMessage);
+		},
     });
 }
 
@@ -184,6 +193,9 @@ function get_listing_ignored() {
             else
                 $(elem).html(result.msg);
         },
+		error: function (jqXhr, textStatus, errorMessage) {
+			console.error(errorMessage);
+		},
     });
 }
 
@@ -210,6 +222,9 @@ function get_listing_pushed(pag) {
             else
                 $(elem).html(result.msg);
         },
+		error: function (jqXhr, textStatus, errorMessage) {
+			console.error(errorMessage);
+		},
     });
 }
 
@@ -228,6 +243,9 @@ function push_file(file, from) {
             get_listing_files_all();
             get_listing_pushed();
         },
+		error: function (jqXhr, textStatus, errorMessage) {
+			console.error(errorMessage);
+		},
     });
 }
 
@@ -245,6 +263,9 @@ function delete_file(file, from) {
             show_msg(result.msg, result.data.title, result.data.type);
             get_listing_all();
         },
+		error: function (jqXhr, textStatus, errorMessage) {
+			console.error(errorMessage);
+		},
     });
 }
 
@@ -262,6 +283,9 @@ function ignore_file(file, type) {
             show_msg(result.msg, result.data.title, result.data.type);
             get_listing_all();
         },
+		error: function (jqXhr, textStatus, errorMessage) {
+			console.error(errorMessage);
+		},
     });
 }
 
@@ -278,6 +302,9 @@ function unignore_file(file) {
             show_msg(result.msg, result.data.title, result.data.type);
             get_listing_all();
         },
+		error: function (jqXhr, textStatus, errorMessage) {
+			console.error(errorMessage);
+		},
     });
 }
 

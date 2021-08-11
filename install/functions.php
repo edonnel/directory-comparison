@@ -63,7 +63,7 @@
 			if ($query) {
 				do {
 					if (!$conn->more_results())
-						return;
+						break;
 
 					if (!$conn->next_result())
 						die($conn->error);
