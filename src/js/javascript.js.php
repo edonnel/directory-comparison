@@ -544,6 +544,81 @@ load_jquery(function() {
         $('#modal_ignore').modal();
     });
 
+    $(document).on('click', '.listing-files .file-row', function() {
+        // toggle checkbox
+        const $checkbox = $(this).find('input[type=checkbox]');
+
+        $checkbox.prop('checked', !$checkbox.prop('checked'));
+
+        if ($checkbox.prop('checked'))
+            $(this).attr('data-selected', 'true');
+        else
+            $(this).attr('data-selected', 'false');
+
+        // toggle options in bulk action box
+        const listings = ['#listing_files_stag', '#listing_files_prod'];
+
+        for (let i = 0; i < listings.length; i++) {
+
+            const listing       = listings[i];
+            const $bulk_select  = $(listing+' .filter-bulk');
+            var type_no         = false;
+            var type_diff       = false;
+            var one_checked     = false;
+
+            // iterate through rows and get change types
+            $(listing+' .file-row').each(function (index, element) {
+                const $checkbox = $(element).find('.file-checkbox');
+
+                if ($checkbox.is(':checked')) {
+                    let types = $(element).attr('data-types');
+                    types = types.split(',');
+
+                    if (types.includes('no'))
+                        type_no = true;
+
+                    if (types.includes('diff'))
+                        type_diff = true;
+
+                    one_checked = true;
+                }
+            });
+
+            // if at least one is checked
+            if (one_checked) {
+
+                // enable select and submit
+                $bulk_select.removeAttr('disabled');
+                $(listing).find('.bulk-sub').removeAttr('disabled');
+
+                // disable/enable push option
+                if (type_no) {
+                    $bulk_select.find('option[value="push"]').attr('disabled', 'disabled');
+
+                    if ($bulk_select.find('option[value="push"]').is(':selected'))
+                        $bulk_select.val($bulk_select.find('option:first').val());
+                } else
+                    $bulk_select.find('option[value="push"]').removeAttr('disabled');
+
+                // disable/enable delete option
+                if (type_diff || type_no) {
+                    $bulk_select.find('option[value="delete"]').attr('disabled', 'disabled');
+
+                    if ($bulk_select.find('option[value="delete"]').is(':selected'))
+                        $bulk_select.val($bulk_select.find('option:first').val());
+                } else
+                    $bulk_select.find('option[value="delete"]').removeAttr('disabled');
+            } else {
+                // disable select and submit
+                $bulk_select
+                    .attr('disabled', 'disabled')
+                    .val($bulk_select.find('option:first').val());
+
+                $(listing).find('.bulk-sub').attr('disabled', 'disabled');
+            }
+        }
+    });
+
     $('#modal_ignore_close').on('click', function() {
         $('#modal_ignore').modal('close');
     });

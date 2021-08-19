@@ -2,17 +2,26 @@
 	if (session_status() === PHP_SESSION_NONE)
 		@session_start();
 
-	$valid_acts = array(
-		'push_all',
-		'sync_staging',
-		'push_all_newer',
-		'push',
-		'delete',
-		'ignore',
-		'unignore',
+	$valid_subs = array(
+		'sub_push_all',
+		'sub_sync',
+		'sub_push_all_newer',
+		'sub_bulk',
 	);
 
-	if (isset($_GET['act']) && in_array($_GET['act'], $valid_acts)) {
+	// check to see if valid sub
+
+	$valid = false;
+
+	foreach ($valid_subs as $valid_sub) {
+
+		if (isset($_POST[$valid_sub]))
+			$valid = true;
+	}
+
+	// run sub
+
+	if ($valid) {
 
 		require_once __DIR__.'/src/php/classes/directory.class.php';
 		require_once __DIR__.'/src/php/classes/deployment.class.php';
@@ -28,7 +37,7 @@
 
 		// push all
 
-		if ($_GET['act'] == 'push_all') {
+		if (isset($_POST['sub_push_all'])) {
 
 			$dir_from   = $dir_stag;
 			$dir_to     = $dir_prod;
@@ -62,7 +71,7 @@
 
 		// sync staging
 
-		if ($_GET['act'] == 'sync_staging') {
+		if (isset($_POST['sync'])) {
 
 			$dir_from   = $dir_prod;
 			$dir_to     = $dir_stag;
@@ -77,8 +86,8 @@
 			foreach ($changed_files as $changed_file) {
 
 				if (!$changed_file->has_reason('dne')) {
-					// add/overwrite file
 
+					// add/overwrite file
 					$file = $changed_file->get_object()->get_path();
 
 					$push_result = \directory\deployment::push_file($conn, $file, $dir_from, $dir_to, $from);
@@ -86,8 +95,8 @@
 					if (!$push_result->is_success())
 						push_alert($push_result->get_msg(), $push_result->get_data('title'), $push_result->get_data('type'), THIS_URL_FULL);
 				} else {
-					// delete file
 
+					// delete file
 					$file = $changed_file->get_object()->get_path();
 
 					$delete_result = \directory\deployment::delete_file($conn, $file, $dir_to, 'stag');
@@ -102,7 +111,7 @@
 
 		// push all new and newer
 
-		if ($_GET['act'] == 'push_all_newer') {
+		if ($_POST['sub_push_all_newer']) {
 
 			$dir_from   = $dir_stag;
 			$dir_to     = $dir_prod;
@@ -127,79 +136,79 @@
 				}
 			}
 
-			push_alert('All files and directories pushed successfully', 'Files Pushed', 'success', THIS_URL_FULL);
+			push_alert('All files and directories pushed successfully.', 'Files Pushed', 'success', THIS_URL_FULL);
 		}
 
-		// push
+		// bulk
 
-		if ($_GET['act'] == 'push') {
+		if (isset($_POST['sub_bulk'])) {
 
-			if (!($file = $_GET['file']))
-				push_alert('File not specified.', 'Error', 'error', THIS_URL_FULL);
+			if (!isset($_POST['from']) || !($from = $_POST['from']))
+				push_alert('"From" parameter wasn\'t set somehow... Check your code.', 'Bulk Action', 'error', THIS_URL_FULL);
 
-			if (!($from = $_GET['from']))
-				push_alert('From parameter not specified.', 'Error', 'error', THIS_URL_FULL);
+			if (!isset($_POST['bulk_action']) || !($bulk_action = $_POST['bulk_action']))
+				push_alert('Please select an action.', 'Bulk Action', 'error', THIS_URL_FULL);
 
-			if ($from == 'stag') {
-				$dir_from   = $dir_stag;
-				$dir_to     = $dir_prod;
-			} else {
-				$dir_from   = $dir_prod;
-				$dir_to     = $dir_stag;
+			if (!isset($_POST['file_paths']) || !($file_paths = $_POST['file_paths']))
+				push_alert('Please select at least one file.', 'Bulk Action', 'error', THIS_URL_FULL);
+
+			$result = new result;
+
+			foreach ($file_paths as $file_path) {
+
+				if ($from == 'stag') {
+					$dir_from   = $dir_stag;
+					$dir_to     = $dir_prod;
+				} else {
+					$dir_from   = $dir_prod;
+					$dir_to     = $dir_stag;
+				}
+
+				// get file obj
+				if ($dir_from->get_file($file_path))
+					$file = $dir_from->get_file($file_path);
+				elseif ($dir_to->get_file($file_path))
+					$file = $dir_to->get_file($file_path);
+				else
+					push_alert('File <b>'.$file_path.'</b> does not exist.', 'Bulk Action', 'error', THIS_URL_FULL);
+
+				// check if file exists
+				if ($bulk_action === 'push' || $bulk_action === 'delete') {
+					if (!$dir_from->get_file($file_path))
+						push_alert('File <b>'.$file_path.'</b> does not exist on '.($from == 'stag' ? 'staging' : 'production').'.', 'Bulk Action - '.ucwords($bulk_action).' Error', 'error', THIS_URL_FULL);
+				}
+
+				// do action
+				if ($bulk_action === 'push') {
+
+					// backup the file
+					if ($backup_file = $dir_to->get_file($file_path))
+						\directory\deployment::backup_file($backup_file->get_full_path());
+
+					$result = \directory\deployment::push_file($conn, $file_path, $dir_from, $dir_to, $from);
+
+				} elseif ($bulk_action === 'delete') {
+
+					\directory\deployment::backup_file($dir_from->get_file($file_path)->get_full_path());
+
+					$result = \directory\deployment::delete_file($conn, $file_path, $dir_from, $from);
+
+				} elseif ($bulk_action === 'ignore') {
+
+					// get type
+					$file_type = $file->is_dir() ? 'dir' : 'file';
+
+					$result = \directory\deployment::ignore_file($conn, $file_path, $dir_stag, $dir_prod, $file_type);
+				}
+
+				if (!$result->is_success())
+					push_alert($result->get_msg(), 'Bulk Action', 'error', THIS_URL_FULL);
 			}
 
-			if ($backup_file = $dir_to->get_file($file))
-				\directory\deployment::backup_file($backup_file->get_full_path());
-
-			$push_result = \directory\deployment::push_file($conn, $file, $dir_from, $dir_to, $from);
-
-			push_alert($push_result->get_msg(), $push_result->get_data('title'), $push_result->get_data('type'), THIS_URL_FULL);
-		}
-
-		// delete
-
-		if ($_GET['act'] == 'delete') {
-
-			if (!($file = $_GET['file']))
-				push_alert('File not specified.', 'Error', 'error', THIS_URL_FULL);
-
-			if (!($from = $_GET['from']))
-				push_alert('From parameter not specified.', 'Error', 'error', THIS_URL_FULL);
-
-			if ($from == 'stag')
-				$dir = $dir_stag;
+			if ($result->is_success())
+				push_alert('Bulk '.$bulk_action.' completed successfully.', 'Bulk Action', 'success', THIS_URL_FULL);
 			else
-				$dir = $dir_prod;
-
-			\directory\deployment::backup_file($dir->get_file($file)->get_full_path());
-
-			$delete_file = \directory\deployment::delete_file($conn, $file, $dir, $from);
-
-			push_alert($delete_file->get_msg(), $delete_file->get_data('title'), $delete_file->get_data('type'), THIS_URL_FULL);
-		}
-
-		// ignore
-
-		if ($_GET['act'] == 'ignore') {
-
-			if (!($file = $_GET['file']))
-				push_alert('File not specified.', 'Error', 'error', THIS_URL_FULL);
-
-			$ignore_file = \directory\deployment::ignore_file($conn, $file, $dir_stag, $dir_prod);
-
-			push_alert($ignore_file->get_msg(), $ignore_file->get_data('title'), $ignore_file->get_data('type'), THIS_URL_FULL);
-		}
-
-		// uningore
-
-		if ($_GET['act'] == 'unignore') {
-
-			if (!($file = $_GET['file']))
-				push_alert('File not specified.', 'Error', 'error', THIS_URL_FULL);
-
-			$unignore_file = \directory\deployment::unignore_file($conn, $file);
-
-			push_alert($unignore_file->get_msg(), $unignore_file->get_data('title'), $unignore_file->get_data('type'), THIS_URL_FULL);
+				push_alert($result->get_msg(), 'Bulk Action', 'error', THIS_URL_FULL);
 		}
 	}
 

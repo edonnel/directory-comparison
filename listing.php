@@ -4,6 +4,15 @@
     <? require_once THIS_DIR.'/src/css/fontawesome.v4.7.0.css'; ?>
 	<? require_once THIS_DIR.'/src/css/style.css'; ?>
     <? require_once THIS_DIR.'/src/css/modal.css'; ?>
+
+    <?
+        if (THEME) {
+            if (file_exists($theme_path = (THIS_DIR.'/src/css/themes/'.THEME.'.css')))
+                require_once $theme_path;
+            else
+                push_alert('Theme file <b>'.THEME.'.css</b> does not exist', 'Theme Error', 'error');
+        }
+    ?>
 </style>
 
 <div class="ca title_box" style="margin-bottom:0;">
@@ -27,9 +36,8 @@
 
 <? if (!$critical) : ?>
 
-&nbsp;
-
 <div class="listing">
+
     <div id="listing_files" class="listing-files">
 
         <div class="w_50 l p_r p_10">
