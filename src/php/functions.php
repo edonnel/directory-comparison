@@ -257,6 +257,7 @@
 
 		define('LIMIT_FILES', $ini['limit_files']);
 		define('DB_CRED_CALLBACK', $ini['db_cred_callback']);
+		define('THEME', $ini['theme']);
 		define('DIR_PROD', $ini['directory']['prod']);
 		define('DIR_STAG', $ini['directory']['stag']);
 		define('DB_HOST', $ini['database']['host']);

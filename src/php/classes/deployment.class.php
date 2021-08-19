@@ -283,7 +283,7 @@
 
 				if ($query) {
 					$result
-						->set_success(false)
+						->set_success(true)
 						->set_msg($name.' <b>'.$file.'</b> ignored.')
 						->set_data('title', 'File Ignored')
 						->set_data('type', 'success');
@@ -373,7 +373,7 @@
 
 			$zip = new \ZipArchive();
 
-			if ($zip->open($backup_dir_new_full_name.'.zip', \ZipArchive::CREATE | \ZipArchive::OVERWRITE) === TRUE) {
+			if ($zip->open($backup_dir_new_full_name.'.zip', \ZipArchive::CREATE) === TRUE) {
 
 				$new_file_name = str_replace(ACCOUNT_ROOT, '', $file_path);
 
