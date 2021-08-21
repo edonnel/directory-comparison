@@ -7,7 +7,7 @@
             <option value="">-- Bulk Actions --</option>
             <option value="push" disabled>Push</option>
             <option value="delete" disabled>Delete</option>
-            <option value="ignore" disabled>Ignore</option>
+            <option value="ignore">Ignore</option>
         </select>
         <input class="bulk-sub" type="submit" name="sub_bulk" value="Submit" disabled />
     </div>
