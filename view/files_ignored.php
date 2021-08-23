@@ -24,11 +24,11 @@
 				<tr class="inactive <?= !$file['file_path'] ? 'more' : '' ?>" data-parent="<?= $file['inherited_parent'] ?>">
 					<td style="width:1px;white-space:nowrap;">
 						<? if ($file['type'] === 'dir') : ?>
-							<i class="icon fa fa-folder-open" aria-hidden="true"></i>
+                            <span class="icon icon-dir-file"><?= $svg['folder'] ?></span>
 						<? elseif ($file['type'] === 'file') : ?>
-							<i class="icon fa fa-file" aria-hidden="true"></i>
+                            <span class="icon icon-dir-file"><?= $svg['file'] ?></span>
                         <? else : ?>
-                            <i class="icon fa fa-question" aria-hidden="true" title="Ignore Manually Added"></i>
+                            <span class="icon icon-dir-file" title="Ignore Manually Added"><?= $svg['question'] ?></span>
 						<? endif; ?>
 					</td>
                     <td style="width:1px;white-space:nowrap;">
@@ -42,14 +42,14 @@
                     <td style="width:1px;white-space:nowrap;">
                         <? if ($file['file_path'] && isset($file['inherit']) && $file['inherit']) : ?>
                             <a href="<?= THIS_URL ?>&act=ignore&file=<?= $file['file_path'] ?>" title="Ignore">
-                                <i class="icon action ignore fa fa-ban" aria-hidden="true"></i>
+                                <span class="icon action ignore"><?= $svg['ignore'] ?></span>
                             </a>
                         <? endif; ?>
                     </td>
 					<td style="width:1px;white-space:nowrap;">
                         <? if ($file['file_path'] && isset($file['inherit']) && !$file['inherit']) : ?>
 						<a href="<?= THIS_URL ?>&act=unignore&file=<?= $file['file_path'] ?>" title="Unignore">
-                            <i class="icon action unignore fa fa-undo" aria-hidden="true"></i>
+                            <span class="icon action unignore"><?= $svg['unignore'] ?></span>
 						</a>
                         <? endif; ?>
 					</td>

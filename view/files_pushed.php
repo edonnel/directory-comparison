@@ -21,19 +21,21 @@
 				<tr class="">
 					<td style="width:1px;white-space:nowrap;">
 						<? if ($file['type'] === 'dir') : ?>
-							<i class="icon fa fa-folder-open" aria-hidden="true"></i>
+                            <span class="icon"><?= $svg['folder'] ?></span>
 						<? else : ?>
-							<i class="icon fa fa-file" aria-hidden="true"></i>
+                            <span class="icon"><?= $svg['file'] ?></span>
 						<? endif; ?>
 					</td>
 					<td style="width:1px;white-space:nowrap;"><?= $file['file_path'] ?></td>
 					<td style="width:1px;white-space:nowrap;"><?= $file['from'] == 'stag' ? 'Staging' : 'Production' ?></td>
-					<td style="width:1px;white-space:nowrap;padding-left:0;padding-right:0;"><i class="icon action fa fa-long-arrow-right" aria-hidden="true"></i></td>
+					<td style="width:1px;white-space:nowrap;padding-left:0;padding-right:0;">
+                        <span class="icon action"><?= $svg['arrow'] ?></span>
+                    </td>
 					<td style="width:1px;white-space:nowrap;">
                         <? if (!$file['deleted']) : ?>
                             <?= $file['from'] == 'stag' ? 'Production' : 'Staging' ?>
                         <? else : ?>
-                            <i class="icon action fa fa-trash" aria-hidden="true"></i>
+                            <span class="icon"><?= $svg['trash'] ?></span>
                         <? endif; ?>
                     </td>
 					<td></td>

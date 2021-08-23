@@ -1,7 +1,6 @@
 <meta name="csrf-token" content="<?= $_SESSION['csrf_token'] ?>">
 
 <style>
-    <? require_once THIS_DIR.'/src/css/fontawesome.v4.7.0.css'; ?>
 	<? require_once THIS_DIR.'/src/css/style.css'; ?>
     <? require_once THIS_DIR.'/src/css/modal.css'; ?>
 
@@ -21,7 +20,7 @@
     </div>
     <div style="display:flex;justify-content:center;align-items:center;" class="r tr">
         <div class="l p_r">
-            <i id="refresh" style="font-size:24px;cursor:pointer;" class="icon action push fa fa-refresh" aria-hidden="true"></i>
+            <span id="refresh" class="icon action push" style="font-size:24px;cursor:pointer;"><?= get_svg_icon('sync-alt') ?></span>
         </div>
         <div class="l" style="color:rgba(0,0,0,0.75);">
             <div>Last Updated</div>
@@ -38,23 +37,23 @@
 
 <div class="listing">
 
-    <div id="listing_files" class="listing-files">
+    <div id="listing_files" class="listing-files-two-col">
 
-        <div class="w_50 l p_r p_10">
-            <div id="listing_files_stag"></div>
+        <div class="listing-files-grid">
+
+            <div class="listing-files" id="listing_files_stag"></div>
+
+            <div class="listing-files" id="listing_files_prod"></div>
+
         </div>
-
-        <div class="w_50 l p_l p_10">
-            <div id="listing_files_prod"></div>
-        </div>
-
-        <div class="c"></div>
 
         <div style="display:flex;justify-content:center;">
             <div class="load-more" id="load_more_files" data-i="<?= LIMIT_FILES ?>">
-                <i class="fa fa-angle-double-down" aria-hidden="true"></i>
-                Load More
-                <i class="fa fa-angle-double-down" aria-hidden="true"></i>
+                <div style="padding:10px 15px;">
+                    <span class="icon"><?= get_svg_icon('angle-double-down') ?></span>
+                    Load More
+                    <span class="icon"><?= get_svg_icon('angle-double-down') ?></span>
+                </div>
             </div>
         </div>
 

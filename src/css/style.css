@@ -88,9 +88,12 @@ table.right .push-link::before { font-size:18px; line-height:0; }
 .inner-table tbody tr td:last-child { padding-right:0; }
 
 .icon { color:#4c4c4c; }
-.icon.action { font-size:20px; line-height:1; }
+.icon svg { width:14px; height:14px; }
+.icon.action { line-height:1; }
+.icon.action svg { width:19px; height:19px; }
+.icon.action.push svg { height:30px; width:21px; margin:-10px 0; }
 
-.icon.icon-dir-file {  }
+.icon.icon-dir-file {}
 
 .ignore:hover { color:#e30000; }
 .delete:hover { color:#e30000; }
@@ -107,19 +110,23 @@ table.right .push-link::before { font-size:18px; line-height:0; }
     border-width:2px;
 }
 
-.listing-files .file-row { cursor:pointer; }
+.listing-files-two-col {}
+.listing-files-two-col .listing-files-grid { display:flex; margin:0 -10px; }
+.listing-files-two-col .listing-files-grid .listing-files { width:50%; margin:0 10px; }
 
-.listing-files .file-row .custom-checkbox-container {
+.listing-files-two-col .file-row { cursor:pointer; }
+
+.listing-files-two-col .file-row .custom-checkbox-container {
     position:absolute;
     top:50%;
     left:50%;
     opacity:0;
     transform:translate(-50%, -50%);
 }
-.listing-files .file-row:hover .custom-checkbox-container,
-.listing-files .file-row[data-selected='true'] .custom-checkbox-container { opacity:1; }
+.listing-files-two-col .file-row:hover .custom-checkbox-container,
+.listing-files-two-col .file-row[data-selected='true'] .custom-checkbox-container { opacity:1; }
 
-.listing-files tr:hover .icon.icon-dir-file { opacity:0; }
+.listing-files-two-col tr:hover .icon.icon-dir-file { opacity:0; }
 
 .nowrap { width:1px; white-space:nowrap; }
 
@@ -133,7 +140,7 @@ table.right .push-link::before { font-size:18px; line-height:0; }
 .pag .pag-text { margin:0 7px; font-size:12px; }
 .pag .pag-num { font-weight:600; }
 .pag .pag-icons { display:flex; }
-.pag .pag-icon {
+.pag .pag-icon svg {
     text-align:center;
     width:25px;
     height:25px;
@@ -147,8 +154,8 @@ table.right .push-link::before { font-size:18px; line-height:0; }
     padding:0;
     border-radius:50%; }
 .pag .pag-icon:not(:last-of-type) { margin-right:5px; }
-.pag .pag-icon:hover { background-color:transparent; color:#2369A3; }
-.pag .pag-icon.disabled {
+.pag .pag-icon svg:hover { background-color:transparent; color:#2369A3; }
+.pag .pag-icon.disabled svg {
     background-color:transparent;
     color:gray;
     border-color:gray;
