@@ -435,7 +435,7 @@ load_jquery(function() {
 
         // on refresh
         $('#refresh').on('click', function() {
-            const $refresh = $(this);
+            const $refresh = $(this).find('svg');
             const transition_time = 500;
 
             $refresh.css({
@@ -544,7 +544,7 @@ load_jquery(function() {
         $('#modal_ignore').modal();
     });
 
-    $(document).on('click', '.listing-files .file-row', function() {
+    $(document).on('click', '.listing-files-two-col .file-row', function() {
         // toggle checkbox
         const $checkbox = $(this).find('input[type=checkbox]');
 

@@ -16,16 +16,18 @@
 				$allow_push = true;
 		}
 
+		$data = array(
+			'changed_files' => $changed_files,
+			'from'          => $from,
+			'header'        => $header,
+			'position'      => $position,
+			'allow_push'    => $allow_push,
+		);
+
 		$output = '';
 
 		if (!$just_rows) {
-			$output = require_return(THIS_DIR.'/view/files.php', array(
-				'changed_files' => $changed_files,
-				'from'          => $from,
-				'header'        => $header,
-				'position'      => $position,
-				'allow_push'    => $allow_push,
-			));
+			$output = require_return(THIS_DIR.'/view/files.php', $data);
 		} else
 			$output .= listing_rows($changed_files, $from);
 
@@ -35,19 +37,29 @@
 	// returns HTML output of just rows
 	function listing_rows(array $changed_files, $from) {
 		$output = '';
+		$data   = array('svg' => array(
+			'ignore'    => get_svg_icon('ban'),
+			'trash'     => get_svg_icon('trash'),
+			'arrow'     => $from == 'stag' ? get_svg_icon('long-arrow-alt-right') : get_svg_icon('long-arrow-alt-left'),
+			'file'      => get_svg_icon('file'),
+			'folder'    => get_svg_icon('folder-open'),
+		));
 
 		foreach ($changed_files as $changed_file)
-			$output .= listing_row($changed_file, $from);
+			$output .= listing_row($changed_file, $from, $data);
 
 		return $output;
 	}
 
 	// returns output of one row
-	function listing_row(change $changed_file, $from) {
-		return require_return(THIS_DIR.'/view/partials/files_row.php', array(
+	function listing_row(change $changed_file, $from, $data_extra = array()) {
+		$data = array(
 			'from'          => $from,
 			'changed_file'  => $changed_file,
-		));
+		);
+		$data = array_merge($data, $data_extra);
+
+		return require_return(THIS_DIR.'/view/partials/files_row.php', $data);
 	}
 
 	function listing_ignored($conn) {
@@ -55,6 +67,13 @@
 
 		return require_return(THIS_DIR.'/view/files_ignored.php', array(
 			'ignored_files' => $ignored_files,
+			'svg'           => array(
+				'ignore'    => get_svg_icon('ban'),
+				'unignore'  => get_svg_icon('undo'),
+				'file'      => get_svg_icon('file'),
+				'folder'    => get_svg_icon('folder-open'),
+				'question'  => get_svg_icon('question'),
+			),
 		));
 	}
 
@@ -71,6 +90,12 @@
 			'pushed_files'          => $pushed_files,
 			'pushed_files_count'    => $pushed_files_count,
 			'num_pages'             => $num_pages,
+			'svg'                   => array(
+				'file'      => get_svg_icon('file'),
+				'folder'    => get_svg_icon('folder-open'),
+				'trash'     => get_svg_icon('trash'),
+				'arrow'     => get_svg_icon('long-arrow-alt-right'),
+			),
 		));
 	}
 
@@ -79,13 +104,13 @@
 
 		echo '<div class="pag" id="pag_'.$element.'" data-current="'.$current.'" data-total="'.$total.'">';
 		echo '<div class="pag-icons">';
-		echo '<i class="pag-icon pag-first fa fa-angle-double-left '.($current==1?'disabled':'').'" aria-hidden="true"></i>';
-		echo '<i class="pag-icon pag-prev fa fa-angle-left '.($current==1?'disabled':'').'" aria-hidden="true"></i>';
+		echo '<span class="pag-icon pag-first '.($current==1?'disabled':'').'">'.get_svg_icon('angle-double-left').'</span>';
+		echo '<span class="pag-icon pag-prev '.($current==1?'disabled':'').'">'.get_svg_icon('angle-left').'</span>';
 		echo '</div>';
 		echo '<div class="pag-text">Page <span class="pag-num pag-num-cur">'.$current.'</span> of <span class="pag-num pag-num-total">'.$total.'</span></div>';
 		echo '<div class="pag-icons">';
-		echo '<i class="pag-icon pag-next fa fa-angle-right '.($current==$total?'disabled':'').'" aria-hidden="true"></i>';
-		echo '<i class="pag-icon pag-last fa fa-angle-double-right '.($current==$total?'disabled':'').'" aria-hidden="true"></i>';
+		echo '<span class="pag-icon pag-next '.($current==$total?'disabled':'').'">'.get_svg_icon('angle-right').'</span>';
+		echo '<span class="pag-icon pag-last '.($current==$total?'disabled':'').'">'.get_svg_icon('angle-double-right').'</span>';
 		echo '</div>';
 		echo '</div>';
 	}
@@ -264,4 +289,11 @@
 		define('DB_USER', $ini['database']['user']);
 		define('DB_PASS', $ini['database']['pass']);
 		define('DB_NAME', $ini['database']['name']);
+	}
+
+	function get_svg_icon($name) {
+		if (file_exists($file_path = THIS_DIR.'/src/svg/'.$name.'.svg'))
+			return file_get_contents($file_path);
+		else
+			return '';
 	}
