@@ -31,6 +31,10 @@
 	// start csrf
 	init_csrf();
 
+	// check submodules
+	if (!file_exists(__DIR__.'/lib/result/result.class.php') || !file_exists(__DIR__.'/lib/changes/changes.class.php'))
+		push_alert('One of more submodules are not present. Please view the <a href="'.THIS_URL_DIR.'/README.md" target="_blank">README</a> for download instructions.', 'Submodules Missing', 'error', false, true);
+
 	// load the rest
 	require_once THIS_DIR.'/process.php';
 	require_once THIS_DIR.'/listing.php';

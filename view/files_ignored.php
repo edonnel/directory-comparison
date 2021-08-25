@@ -21,7 +21,11 @@
 		</tr>
 		<? if ($ignored_files) : ?>
 			<? foreach ($ignored_files as $file) : ?>
-				<tr class="inactive <?= !$file['file_path'] ? 'more' : '' ?>" data-parent="<?= $file['inherited_parent'] ?>">
+				<tr
+                    class="row-file inactive <?= !$file['file_path'] ? 'more' : '' ?>"
+                    data-parent="<?= $file['inherited_parent'] ?>"
+                    data-file="<?= $file['file_path'] ?>"
+                >
 					<td style="width:1px;white-space:nowrap;">
 						<? if ($file['type'] === 'dir') : ?>
                             <span class="icon icon-dir-file"><?= $svg['folder'] ?></span>
@@ -39,18 +43,18 @@
                         <? endif; ?>
                     </td>
                     <td></td>
-                    <td style="width:1px;white-space:nowrap;">
+                    <td class="col-action">
                         <? if ($file['file_path'] && isset($file['inherit']) && $file['inherit']) : ?>
-                            <a href="<?= THIS_URL ?>&act=ignore&file=<?= $file['file_path'] ?>" title="Ignore">
+                            <div class="listing-action" data-act="ignore" title="Ignore">
                                 <span class="icon action ignore"><?= $svg['ignore'] ?></span>
-                            </a>
+                            </div>
                         <? endif; ?>
                     </td>
-					<td style="width:1px;white-space:nowrap;">
+					<td class="col-action">
                         <? if ($file['file_path'] && isset($file['inherit']) && !$file['inherit']) : ?>
-						<a href="<?= THIS_URL ?>&act=unignore&file=<?= $file['file_path'] ?>" title="Unignore">
-                            <span class="icon action unignore"><?= $svg['unignore'] ?></span>
-						</a>
+                            <div class="listing-action" data-act="unignore" title="Unignore">
+                                <span class="icon action ignore"><?= $svg['unignore'] ?></span>
+                            </div>
                         <? endif; ?>
 					</td>
 				</tr>

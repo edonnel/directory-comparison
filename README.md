@@ -14,6 +14,20 @@ Installation is pretty simple. It requires very little configuration.
 Please read the <a href="https://github.com/edonnel/staging-directory-comparison/wiki">wiki</a> for important 
 implementation details.
 
+## Dependencies
+
+This repo uses a couple submodules I made. They need to be downloaded and installed in order for this to function properly. The submodule directory is `/lib`.
+
+### result.class.php
+
+Place in `/lib/result/`.<br />
+Repo: https://github.com/edonnel/result.class.php
+
+### changes.class.php
+
+Place in `/lib/changes/`.<br />
+Repo: https://github.com/edonnel/changes.class.php
+
 ## License
 
 This code is released under the GNU Lesser General Public License (LGPL). For more information, visit http://www.gnu.org/copyleft/lesser.html

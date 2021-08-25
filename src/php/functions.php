@@ -228,6 +228,8 @@
 			$csrf_token = $headers['Csrftoken'];
 		elseif (isset($headers['CsrfToken']))
 			$csrf_token = $headers['CsrfToken'];
+		elseif (isset($headers['csrftoken']))
+			$csrf_token = $headers['csrftoken'];
 		else
 			$csrf_token = false;
 		
