@@ -37,13 +37,37 @@
 
 <div class="listing">
 
-    <div id="listing_files" class="listing-files-two-col">
+    <div id="listing_files">
 
         <div class="listing-files-grid">
 
-            <div class="listing-files" id="listing_files_stag"></div>
+            <? foreach (['stag','prod'] as $from) : ?>
 
-            <div class="listing-files" id="listing_files_prod"></div>
+                <div class="listing-files-grid-box">
+
+                    <form method="post" id="listing_form_<?= $from ?>" class="listing-form">
+                        <input type="hidden" name="from" value="<?= $from ?>" />
+
+                        <div>
+                            <label for="filter_bulk_<?= $from ?>" style="display:none;">Bulk Actions:</label>
+                            <select class="filter-bulk" id="filter_bulk_<?= $from ?>" name="bulk_action" disabled>
+                                <option value="">-- Bulk Actions --</option>
+                                <option value="push" disabled>Push</option>
+                                <option value="delete" disabled>Delete</option>
+                                <option value="ignore">Ignore</option>
+                            </select>
+                            <input class="bulk-sub" type="submit" name="sub_bulk" value="Submit" disabled />
+                        </div>
+
+                        &nbsp;
+
+                        <div class="listing-files" id="listing_files_<?= $from ?>"></div>
+
+                    </form>
+
+                </div>
+
+            <? endforeach; ?>
 
         </div>
 

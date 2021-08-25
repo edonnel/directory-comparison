@@ -502,41 +502,26 @@ load_jquery(function() {
 
     });
 
-    $(document).on('click', '.listing a', function(e) {
-        e.preventDefault();
+    $(document).on('click', '.listing .listing-action', function() {
+        const from = $(this).parents('.listing-files-table').attr('data-from');
+        const file = $(this).parents('.row-file').attr('data-file');
+        const act = $(this).attr('data-act');
 
-        const href = $(this).attr('href');
+        console.log(from);
 
-        if (href) {
-            const act   = get_url_param(href, 'act');
-            const file  = get_url_param(href, 'file');
-            var from    = null;
-
-            if (act && file) {
-                if (act == 'push' || act == 'delete')
-                    from = get_url_param(href, 'from');
-                else
-                    from = true;
-
-                if (from) {
-
-                    switch (act) {
-                        case 'push':
-                            push_file(file, from);
-                            break;
-                        case 'delete':
-                            delete_file(file, from);
-                            break;
-                        case 'ignore':
-                            ignore_file(file);
-                            break;
-                        case 'unignore':
-                            unignore_file(file);
-                            break;
-                    }
-                } else
-                    alert('From parameter not found');
-            }
+        switch (act) {
+            case 'push':
+                push_file(file, from);
+                break;
+            case 'delete':
+                delete_file(file, from);
+                break;
+            case 'ignore':
+                ignore_file(file);
+                break;
+            case 'unignore':
+                unignore_file(file);
+                break;
         }
     });
 
@@ -544,7 +529,7 @@ load_jquery(function() {
         $('#modal_ignore').modal();
     });
 
-    $(document).on('click', '.listing-files-two-col .file-row', function() {
+    $(document).on('click', '.listing-files .row-file', function() {
         // toggle checkbox
         const $checkbox = $(this).find('input[type=checkbox]');
 
@@ -556,7 +541,7 @@ load_jquery(function() {
             $(this).attr('data-selected', 'false');
 
         // toggle options in bulk action box
-        const listings = ['#listing_files_stag', '#listing_files_prod'];
+        const listings = ['#listing_form_stag', '#listing_form_prod'];
 
         for (let i = 0; i < listings.length; i++) {
 
@@ -567,7 +552,7 @@ load_jquery(function() {
             var one_checked     = false;
 
             // iterate through rows and get change types
-            $(listing+' .file-row').each(function (index, element) {
+            $(listing+' .row-file').each(function (index, element) {
                 const $checkbox = $(element).find('.file-checkbox');
 
                 if ($checkbox.is(':checked')) {
