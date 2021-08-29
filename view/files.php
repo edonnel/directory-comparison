@@ -1,3 +1,5 @@
+<? namespace directory_comparison; ?>
+
 <table class="listing-files-table table <?= $position ?>" data-from="<?= $from ?>">
     <thead>
         <tr>

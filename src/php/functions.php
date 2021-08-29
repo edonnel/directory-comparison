@@ -1,12 +1,14 @@
 <?
-	function listing(\directory\directory $directory, \directory\directory $directory_other, $all_files, $header, $from, $position, $limit = LIMIT_FILES, $start = 0, $just_rows = false) {
+	namespace directory_comparison;
+
+	function listing(\directory_comparison\directory $directory, \directory_comparison\directory $directory_other, $all_files, $header, $from, $position, $limit = LIMIT_FILES, $start = 0, $just_rows = false) {
 		if ($from != 'stag' && $from != 'prod')
 			$from = 'stag';
 
 		if ($position != 'left' && $position != 'right')
 			$position = 'left';
 
-		$changed_files = \directory\directory::get_directory_changes($directory, $directory_other, $all_files, $limit, $start);
+		$changed_files = \directory_comparison\directory::get_directory_changes($directory, $directory_other, $all_files, $limit, $start);
 		$changed_files = $changed_files->get();
 
 		$allow_push = false;
@@ -52,7 +54,7 @@
 	}
 
 	// returns output of one row
-	function listing_row(change $changed_file, $from, $data_extra = array()) {
+	function listing_row(\change $changed_file, $from, $data_extra = array()) {
 		$data = array(
 			'from'          => $from,
 			'changed_file'  => $changed_file,
@@ -63,7 +65,7 @@
 	}
 
 	function listing_ignored($conn) {
-		$ignored_files = \directory\deployment::get_ignored_files($conn, PATH_STAG, PATH_PROD);
+		$ignored_files = \directory_comparison\deployment::get_ignored_files($conn, PATH_STAG, PATH_PROD);
 
 		return require_return(THIS_DIR.'/view/files_ignored.php', array(
 			'ignored_files' => $ignored_files,
@@ -77,10 +79,10 @@
 		));
 	}
 
-	function listing_pushed(mysqli $conn, $page = 0) {
+	function listing_pushed(\mysqli $conn, $page = 0) {
 		$limit              = 10;
-		$pushed_files       = \directory\deployment::get_pushed_files($conn, $limit, $page);
-		$pushed_files_count = \directory\deployment::get_pushed_files_count($conn);
+		$pushed_files       = \directory_comparison\deployment::get_pushed_files($conn, $limit, $page);
+		$pushed_files_count = \directory_comparison\deployment::get_pushed_files_count($conn);
 
 		$num_pages = ceil($pushed_files_count / $limit);
 
@@ -139,7 +141,7 @@
 	function get_alerts($only_first = false) {
 		$output = '';
 
-		if (is_array($_SESSION['ed_alerts']) && count($_SESSION['ed_alerts']) > 0) {
+		if (isset($_SESSION['ed_alerts']) && is_array($_SESSION['ed_alerts']) && count($_SESSION['ed_alerts']) > 0) {
 			$output .= '<div class="ed-alerts">';
 
 			foreach ($_SESSION['ed_alerts'] as $alert) {
@@ -248,7 +250,7 @@
 	}
 
 	function get_conn() {
-		if (DB_CRED_CALLBACK && function_exists(DB_CRED_CALLBACK))
+		if (DB_CRED_CALLBACK && function_exists(__NAMESPACE__.'\\'.DB_CRED_CALLBACK))
 			$db_cred = DB_CRED_CALLBACK();
 		else {
 			$db_cred = array(
@@ -259,7 +261,7 @@
 			);
 		}
 
-		$conn = new mysqli($db_cred['host'], $db_cred['user'], $db_cred['pass'], $db_cred['name']);
+		$conn = new \mysqli($db_cred['host'], $db_cred['user'], $db_cred['pass'], $db_cred['name']);
 
 		if (mysqli_connect_error())
 			die('Connection could not be made. Error: '.$conn->connect_error);

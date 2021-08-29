@@ -1,5 +1,5 @@
 <?
-	namespace directory;
+	namespace directory_comparison;
 
 	class deployment {
 
@@ -401,7 +401,7 @@
 			return $conn->query($stmt);
 		}
 
-		// recursively deletes directory
+		// recursively delete directory
 		public static function rrmdir($dir) {
 			if (is_dir($dir)) {
 				$objects = scandir($dir);
@@ -422,9 +422,67 @@
 				rmdir($dir);
 
 				return true;
-			}
+			} elseif (file_exists($dir))
+				unlink($dir);
 
 			return false;
+		}
+
+		// recursively move files and folders to a folder
+		public static function rcopy($src, $dst) {
+			if (!file_exists($dst))
+				mkdir($dst);
+			elseif (is_file($dst))
+				return false;
+
+			if (is_dir($src)) {
+				$files = scandir($src);
+
+				foreach ($files as $file) {
+					if ($file != "." && $file != "..")
+						self::rcopy("$src/$file", $dst);
+				}
+			} elseif (file_exists($src)) {
+				$basename   = basename($src);
+				$copy       = copy($src, $dst.'/'.$basename);
+
+				if (!$copy)
+					return false;
+			}
+
+			return true;
+		}
+
+		// recursively copy files and folders to a folder
+		public static function rmove($src, $dst) {
+			if (!file_exists($dst))
+				mkdir($dst);
+			elseif (is_file($dst))
+				return false;
+
+			if (is_dir($src)) {
+				$files = scandir($src);
+
+				foreach ($files as $file) {
+					if ($file != "." && $file != "..")
+						self::rcopy("$src/$file", $dst);
+				}
+			} elseif (file_exists($src)) {
+				$basename   = basename($src);
+				$move       = rename($src, $dst.'/'.$basename);
+
+				if (!$move)
+					return false;
+			}
+
+			return true;
+		}
+
+		public static function is_dir_empty($dir) {
+			if (!is_readable($dir))
+				return false;
+			else
+				return (count(scandir($dir)) == 2);
 		}
 
 		public static function clean_filename($filename) {

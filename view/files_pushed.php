@@ -1,3 +1,5 @@
+<? namespace directory_comparison; ?>
+
 <table class="table condensed">
 	<thead>
 		<tr>
