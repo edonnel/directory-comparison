@@ -1,10 +1,12 @@
 <?
+	namespace directory_comparison;
+
 	if (!defined('THIS_DIR'))
 		define('THIS_DIR', __DIR__);
 
 	define('DOCUMENT_ROOT', $_SERVER['DOCUMENT_ROOT']);
 	define('REAL_ROOT', realpath($_SERVER['DOCUMENT_ROOT']));
-	define('THIS_URL', '?a='.$_GET['a']);
+	define('THIS_URL', '?a='.($_GET['a'] ?? ''));
 	define('ACCOUNT_ROOT', dirname(DOCUMENT_ROOT));
 
 	const PATH_PROD = ACCOUNT_ROOT.'/'.DIR_PROD;

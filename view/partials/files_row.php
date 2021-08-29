@@ -1,5 +1,7 @@
 <?
-	$file       = $changed_file->get_object();
+    namespace directory_comparison;
+
+    $file       = $changed_file->get_object();
 	$file_path  = $file->get_path();
 	$file_other = $changed_file->get_object_other();
 

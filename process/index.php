@@ -1,4 +1,6 @@
 <?
+	namespace directory_comparison;
+
 	ini_set('display_errors', 1);
 
 	define('THIS_DIR', dirname(__DIR__));
@@ -30,18 +32,18 @@
 	$validate_csrf = validate_csrf();
 
 	if (!$validate_csrf['success']) {
-		$result = (new result)
+		$result = (new \result)
 			->set_success(false)
 			->set_msg($validate_csrf['msg']);
 
 		$result->echo_json(true);
 	}
 
-	$files_to_exclude   = \directory\deployment::get_ignored_files($conn, null, null, false);
-	$dir_stag           = new directory\directory(PATH_STAG, $files_to_exclude);
-	$dir_prod           = new directory\directory(PATH_PROD, $files_to_exclude);
+	$files_to_exclude   = deployment::get_ignored_files($conn, null, null, false);
+	$dir_stag           = new directory(PATH_STAG, $files_to_exclude);
+	$dir_prod           = new directory(PATH_PROD, $files_to_exclude);
 
-	$result = new result;
+	$result = new \result;
 	$result
 		->set_msg('Nothing happened.')
 		->set_data('title', 'Error')
@@ -68,7 +70,7 @@
 				$position   = 'Right';
 			}
 
-			$all_files = directory\directory::combine_directories($dir_stag, $dir_prod);
+			$all_files = directory::combine_directories($dir_stag, $dir_prod);
 
 			if (isset($_GET['limit']) && is_integer($_GET['limit']))
 				$limit = $_GET['limit'];
@@ -116,7 +118,7 @@
 
 	if ($_GET['act'] == 'push') {
 
-		$result = new result;
+		$result = new \result;
 
 		if ($file = $_GET['file']) {
 
@@ -131,9 +133,9 @@
 				}
 
 				if ($backup_file = $dir_to->get_file($file))
-					\directory\deployment::backup_file($backup_file->get_full_path());
+					deployment::backup_file($backup_file->get_full_path());
 
-				$result = \directory\deployment::push_file($conn, $file, $dir_from, $dir_to, $from);
+				$result = deployment::push_file($conn, $file, $dir_from, $dir_to, $from);
 			} else {
 				$result
 					->set_success(false)
@@ -154,7 +156,7 @@
 
 	if ($_GET['act'] == 'delete') {
 
-		$result = new result;
+		$result = new \result;
 
 		if ($file = $_GET['file']) {
 
@@ -165,9 +167,9 @@
 				else
 					$dir = $dir_prod;
 
-				\directory\deployment::backup_file($dir->get_file($file)->get_full_path());
+				deployment::backup_file($dir->get_file($file)->get_full_path());
 
-				$result = \directory\deployment::delete_file($conn, $file, $dir, $from);
+				$result = deployment::delete_file($conn, $file, $dir, $from);
 			} else {
 				$result
 					->set_success(false)
@@ -188,10 +190,10 @@
 
 	if ($_GET['act'] == 'ignore') {
 
-		$result = new result;
+		$result = new \result;
 
 		if ($file = $_GET['file']) {
-			$result = \directory\deployment::ignore_file($conn, $file, $dir_stag, $dir_prod, $_GET['type']);
+			$result = deployment::ignore_file($conn, $file, $dir_stag, $dir_prod, $_GET['type']);
 		} else {
 			$result
 				->set_success(false)
@@ -205,10 +207,10 @@
 
 	if ($_GET['act'] == 'unignore') {
 
-		$result = new result;
+		$result = new \result;
 
 		if ($file = $_GET['file']) {
-			$result = \directory\deployment::unignore_file($conn, $file);
+			$result = deployment::unignore_file($conn, $file);
 		} else {
 			$result
 				->set_success(false)

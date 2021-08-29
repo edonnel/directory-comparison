@@ -1,5 +1,5 @@
 <?
-	namespace directory;
+	namespace directory_comparison;
 
 	class directory {
 		private $base_dir;

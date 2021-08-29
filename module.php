@@ -1,5 +1,9 @@
 <?
+	namespace directory_comparison;
+
 	ini_set('display_errors', 1);
+
+	error_reporting(E_ALL);
 
 	const THIS_DIR = __DIR__;
 

@@ -1,4 +1,6 @@
 <?
+	namespace directory_comparison;
+	
 	if (session_status() === PHP_SESSION_NONE)
 		@session_start();
 
@@ -28,12 +30,12 @@
 		require_once __DIR__.'/lib/result/result.class.php';
 		require_once __DIR__.'/lib/changes/changes.class.php';
 
-		$files_to_exclude = \directory\deployment::get_ignored_files($conn, null, null, false);
+		$files_to_exclude = deployment::get_ignored_files($conn, null, null, false);
 
-		$dir_stag = new directory\directory(PATH_STAG, $files_to_exclude);
-		$dir_prod = new directory\directory(PATH_PROD, $files_to_exclude);
+		$dir_stag = new directory(PATH_STAG, $files_to_exclude);
+		$dir_prod = new directory(PATH_PROD, $files_to_exclude);
 
-		$all_files = directory\directory::combine_directories($dir_stag, $dir_prod);
+		$all_files = directory::combine_directories($dir_stag, $dir_prod);
 
 		// push all
 
@@ -43,11 +45,11 @@
 			$dir_to     = $dir_prod;
 			$from       = 'stag';
 
-			$changes        = \directory\directory::get_directory_changes($dir_from, $dir_to, $all_files);
+			$changes        = directory::get_directory_changes($dir_from, $dir_to, $all_files);
 			$changed_files  = $changes->get();
 			$files          = array();
 
-			$backup = \directory\deployment::backup_changes($changes);
+			$backup = deployment::backup_changes($changes);
 
 			if (!$backup)
 				push_alert('Files and directories not pushed. Could not create backup zip file.', 'Files Not Pushed', 'error', THIS_URL_FULL);
@@ -58,7 +60,7 @@
 
 					$file = $changed_file->get_object()->get_path();
 
-					$push_result = \directory\deployment::push_file($conn, $file, $dir_from, $dir_to, $from);
+					$push_result = deployment::push_file($conn, $file, $dir_from, $dir_to, $from);
 
 					if (!$push_result->is_success())
 						push_alert($push_result->get_msg(), $push_result->get_data('title'), $push_result->get_data('type'), THIS_URL_FULL);
@@ -77,11 +79,11 @@
 			$dir_to     = $dir_stag;
 			$from       = 'prod';
 
-			$changes        = \directory\directory::get_directory_changes($dir_from, $dir_to, $all_files);
+			$changes        = directory::get_directory_changes($dir_from, $dir_to, $all_files);
 			$changed_files  = $changes->get();
 			$files          = array();
 
-			\directory\deployment::backup_changes($changes);
+			deployment::backup_changes($changes);
 
 			foreach ($changed_files as $changed_file) {
 
@@ -90,7 +92,7 @@
 					// add/overwrite file
 					$file = $changed_file->get_object()->get_path();
 
-					$push_result = \directory\deployment::push_file($conn, $file, $dir_from, $dir_to, $from);
+					$push_result = deployment::push_file($conn, $file, $dir_from, $dir_to, $from);
 
 					if (!$push_result->is_success())
 						push_alert($push_result->get_msg(), $push_result->get_data('title'), $push_result->get_data('type'), THIS_URL_FULL);
@@ -99,7 +101,7 @@
 					// delete file
 					$file = $changed_file->get_object()->get_path();
 
-					$delete_result = \directory\deployment::delete_file($conn, $file, $dir_to, 'stag');
+					$delete_result = deployment::delete_file($conn, $file, $dir_to, 'stag');
 
 					if (!$delete_result->is_success())
 						push_alert($delete_result->get_msg(), $delete_result->get_data('title'), $delete_result->get_data('type'), THIS_URL_FULL);
@@ -117,11 +119,11 @@
 			$dir_to     = $dir_prod;
 			$from       = 'stag';
 
-			$changes        = \directory\directory::get_directory_changes($dir_from, $dir_to, $all_files);
+			$changes        = directory::get_directory_changes($dir_from, $dir_to, $all_files);
 			$changed_files  = $changes->get();
 			$files          = array();
 
-			\directory\deployment::backup_changes($changes);
+			deployment::backup_changes($changes);
 
 			foreach ($changed_files as $changed_file) {
 
@@ -129,7 +131,7 @@
 
 					$file = $changed_file->get_object()->get_path();
 
-					$push_result = \directory\deployment::push_file($conn, $file, $dir_from, $dir_to, $from);
+					$push_result = deployment::push_file($conn, $file, $dir_from, $dir_to, $from);
 
 					if (!$push_result->is_success())
 						push_alert($push_result->get_msg(), $push_result->get_data('title'), $push_result->get_data('type'), THIS_URL_FULL);
@@ -152,7 +154,7 @@
 			if (!isset($_POST['file_paths']) || !($file_paths = $_POST['file_paths']))
 				push_alert('Please select at least one file.', 'Bulk Action', 'error', THIS_URL_FULL);
 
-			$result = new result;
+			$result = new \result;
 
 			foreach ($file_paths as $file_path) {
 
@@ -183,22 +185,22 @@
 
 					// backup the file
 					if ($backup_file = $dir_to->get_file($file_path))
-						\directory\deployment::backup_file($backup_file->get_full_path());
+						deployment::backup_file($backup_file->get_full_path());
 
-					$result = \directory\deployment::push_file($conn, $file_path, $dir_from, $dir_to, $from);
+					$result = deployment::push_file($conn, $file_path, $dir_from, $dir_to, $from);
 
 				} elseif ($bulk_action === 'delete') {
 
-					\directory\deployment::backup_file($dir_from->get_file($file_path)->get_full_path());
+					deployment::backup_file($dir_from->get_file($file_path)->get_full_path());
 
-					$result = \directory\deployment::delete_file($conn, $file_path, $dir_from, $from);
+					$result = deployment::delete_file($conn, $file_path, $dir_from, $from);
 
 				} elseif ($bulk_action === 'ignore') {
 
 					// get type
 					$file_type = $file->is_dir() ? 'dir' : 'file';
 
-					$result = \directory\deployment::ignore_file($conn, $file_path, $dir_stag, $dir_prod, $file_type);
+					$result = deployment::ignore_file($conn, $file_path, $dir_stag, $dir_prod, $file_type);
 				}
 
 				if (!$result->is_success())

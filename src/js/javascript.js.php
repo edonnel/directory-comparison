@@ -1,3 +1,5 @@
+<? namespace directory_comparison; ?>
+
 const THIS_URL      = '<?= THIS_URL ?>';
 const THIS_DIR      = '<?= THIS_DIR ?>';
 const THIS_URL_DIR  = '<?= THIS_URL_DIR ?>';
@@ -506,8 +508,6 @@ load_jquery(function() {
         const from = $(this).parents('.listing-files-table').attr('data-from');
         const file = $(this).parents('.row-file').attr('data-file');
         const act = $(this).attr('data-act');
-
-        console.log(from);
 
         switch (act) {
             case 'push':
