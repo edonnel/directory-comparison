@@ -117,68 +117,6 @@
 		echo '</div>';
 	}
 
-	function push_alert($text, $title = '', $type = 'alert', $redirect = false, $critical = false) {
-		if (!is_array($_SESSION['ed_alerts']) || !isset($_SESSION['ed_alerts']))
-			$_SESSION['ed_alerts'] = array();
-
-		array_push($_SESSION['ed_alerts'], array(
-			'text'      => $text,
-			'title'     => $title,
-			'type'      => $type,
-			'critical'  => $critical,
-		));
-
-		if ($redirect) {
-			if (!headers_sent())
-				header('Location: '.$redirect);
-			else
-				echo '<script type="text/javascript">window.location="'.$redirect.'"</script>';
-
-			die();
-		}
-	}
-
-	function get_alerts($only_first = false) {
-		$output = '';
-
-		if (isset($_SESSION['ed_alerts']) && is_array($_SESSION['ed_alerts']) && count($_SESSION['ed_alerts']) > 0) {
-			$output .= '<div class="ed-alerts">';
-
-			foreach ($_SESSION['ed_alerts'] as $alert) {
-				$output .= '<div class="ed-alert '.$alert['type'].'">';
-				$output .= '<div class="fa fa-fw fa-close close" style="float:right; line-height:inherit; cursor:pointer;" onclick="RemoveEDAlert(this);"></div>';
-
-				if ($alert['title'])
-					$output .= '<div class="ed-alert-title">'.$alert['title'].'</div>';
-
-				$output .= '<div class="ed-alert-text">'.$alert['text'].'</div>';
-				$output .= '</div>';
-
-				if ($only_first)
-					break;
-			}
-
-			$output .= '</div>';
-
-			$output .= '<script>function RemoveEDAlert(that){$(that).parent().slideUp();}</script>';
-
-			unset($_SESSION['ed_alerts']);
-		}
-
-		return $output;
-	}
-
-	function alerts_are_critical() {
-		if (isset($_SESSION['ed_alerts']) && $_SESSION['ed_alerts']) {
-			foreach ($_SESSION['ed_alerts'] as $alert) {
-				if (isset($alert['critical']) && $alert['critical'])
-					return true;
-			}
-		}
-
-		return false;
-	}
-
 	// returns content of file
 	function require_return($file_path, $data = array(), $decode = false) {
 		// check if file exists
@@ -203,50 +141,10 @@
 			return $content;
 	}
 
-	if (!function_exists('pre_dump')) {
-		function pre_dump($x) {
-			echo '<pre>';
-			var_dump($x);
-			echo '</pre>';
-		}
-	}
-
-	function init_csrf() {
-		if (!isset($_SESSION['csrf_token']) || (isset($_SESSION['csrf_token']) && !$_SESSION['csrf_token']))
-			$_SESSION['csrf_token'] = bin2hex(random_bytes(32));
-	}
-
-	function validate_csrf() {
-		$return = array(
-			'success'   => false,
-			'msg'       => 'Unknown CSRF Error',
-		);
-
-		init_csrf();
-
-		$headers = apache_request_headers();
-
-		if (isset($headers['Csrftoken']))
-			$csrf_token = $headers['Csrftoken'];
-		elseif (isset($headers['CsrfToken']))
-			$csrf_token = $headers['CsrfToken'];
-		elseif (isset($headers['csrftoken']))
-			$csrf_token = $headers['csrftoken'];
-		else
-			$csrf_token = false;
-		
-		if ($csrf_token) {
-			if (!hash_equals($csrf_token, $_SESSION['csrf_token'])) {
-				$return['success'] = false;
-				$return['msg']     = 'Wrong CSRF token.';
-			} else
-				$return['success'] = true;
-		} else {
-			$return['success']  = false;
-			$return['msg']      = 'No CSRF token.';
-		}
-
-		return $return;
+	function pre_dump($x) {
+		echo '<pre>';
+		var_dump($x);
+		echo '</pre>';
 	}
 
 	function get_conn() {
@@ -300,4 +198,9 @@
 			return file_get_contents($file_path);
 		else
 			return '';
+	}
+
+	function start_the_session() {
+		if (session_status() === PHP_SESSION_NONE)
+			@session_start();
 	}

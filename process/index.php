@@ -7,10 +7,11 @@
 
 	header('Content-Type: application/json');
 
-	session_start();
-
 	// load functions
 	require_once THIS_DIR.'/src/php/functions.php';
+
+	// start the session
+	start_the_session();
 
 	// load function functions
 	if (file_exists(THIS_DIR.'/src/php/functions_custom.php'))
@@ -24,12 +25,13 @@
 	require_once THIS_DIR.'/src/php/classes/deployment.class.php';
 	require_once THIS_DIR.'/lib/result/result.class.php';
 	require_once THIS_DIR.'/lib/changes/changes.class.php';
+	require_once THIS_DIR.'/lib/csrf/csrf.class.php';
 
 	// load globals
 	require_once THIS_DIR.'/globals.php';
 
 	// security
-	$validate_csrf = validate_csrf();
+	$validate_csrf = \csrf::validate();
 
 	if (!$validate_csrf['success']) {
 		$result = (new \result)

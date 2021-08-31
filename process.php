@@ -1,8 +1,7 @@
 <?
 	namespace directory_comparison;
-	
-	if (session_status() === PHP_SESSION_NONE)
-		@session_start();
+
+	start_the_session();
 
 	$valid_subs = array(
 		'sub_push_all',
@@ -52,7 +51,7 @@
 			$backup = deployment::backup_changes($changes);
 
 			if (!$backup)
-				push_alert('Files and directories not pushed. Could not create backup zip file.', 'Files Not Pushed', 'error', THIS_URL_FULL);
+				\alerts::push('Files and directories not pushed. Could not create backup zip file.', 'Files Not Pushed', 'error', THIS_URL_FULL);
 
 			foreach ($changed_files as $changed_file) {
 
@@ -63,11 +62,11 @@
 					$push_result = deployment::push_file($conn, $file, $dir_from, $dir_to, $from);
 
 					if (!$push_result->is_success())
-						push_alert($push_result->get_msg(), $push_result->get_data('title'), $push_result->get_data('type'), THIS_URL_FULL);
+						\alerts::push($push_result->get_msg(), $push_result->get_data('title'), $push_result->get_data('type'), THIS_URL_FULL);
 				}
 			}
 
-			push_alert('All files and directories pushed successfully', 'Files Pushed', 'success', THIS_URL_FULL);
+			\alerts::push('All files and directories pushed successfully', 'Files Pushed', 'success', THIS_URL_FULL);
 
 		}
 
@@ -95,7 +94,7 @@
 					$push_result = deployment::push_file($conn, $file, $dir_from, $dir_to, $from);
 
 					if (!$push_result->is_success())
-						push_alert($push_result->get_msg(), $push_result->get_data('title'), $push_result->get_data('type'), THIS_URL_FULL);
+						\alerts::push($push_result->get_msg(), $push_result->get_data('title'), $push_result->get_data('type'), THIS_URL_FULL);
 				} else {
 
 					// delete file
@@ -104,11 +103,11 @@
 					$delete_result = deployment::delete_file($conn, $file, $dir_to, 'stag');
 
 					if (!$delete_result->is_success())
-						push_alert($delete_result->get_msg(), $delete_result->get_data('title'), $delete_result->get_data('type'), THIS_URL_FULL);
+						\alerts::push($delete_result->get_msg(), $delete_result->get_data('title'), $delete_result->get_data('type'), THIS_URL_FULL);
 				}
 			}
 
-			push_alert('Staging synced with production successfully', 'Staging Synced', 'success', THIS_URL_FULL);
+			\alerts::push('Staging synced with production successfully', 'Staging Synced', 'success', THIS_URL_FULL);
 		}
 
 		// push all new and newer
@@ -134,11 +133,11 @@
 					$push_result = deployment::push_file($conn, $file, $dir_from, $dir_to, $from);
 
 					if (!$push_result->is_success())
-						push_alert($push_result->get_msg(), $push_result->get_data('title'), $push_result->get_data('type'), THIS_URL_FULL);
+						\alerts::push($push_result->get_msg(), $push_result->get_data('title'), $push_result->get_data('type'), THIS_URL_FULL);
 				}
 			}
 
-			push_alert('All files and directories pushed successfully.', 'Files Pushed', 'success', THIS_URL_FULL);
+			\alerts::push('All files and directories pushed successfully.', 'Files Pushed', 'success', THIS_URL_FULL);
 		}
 
 		// bulk
@@ -146,13 +145,13 @@
 		if (isset($_POST['sub_bulk'])) {
 
 			if (!isset($_POST['from']) || !($from = $_POST['from']))
-				push_alert('"From" parameter wasn\'t set somehow... Check your code.', 'Bulk Action', 'error', THIS_URL_FULL);
+				\alerts::push('"From" parameter wasn\'t set somehow... Check your code.', 'Bulk Action', 'error', THIS_URL_FULL);
 
 			if (!isset($_POST['bulk_action']) || !($bulk_action = $_POST['bulk_action']))
-				push_alert('Please select an action.', 'Bulk Action', 'error', THIS_URL_FULL);
+				\alerts::push('Please select an action.', 'Bulk Action', 'error', THIS_URL_FULL);
 
 			if (!isset($_POST['file_paths']) || !($file_paths = $_POST['file_paths']))
-				push_alert('Please select at least one file.', 'Bulk Action', 'error', THIS_URL_FULL);
+				\alerts::push('Please select at least one file.', 'Bulk Action', 'error', THIS_URL_FULL);
 
 			$result = new \result;
 
@@ -172,12 +171,12 @@
 				elseif ($dir_to->get_file($file_path))
 					$file = $dir_to->get_file($file_path);
 				else
-					push_alert('File <b>'.$file_path.'</b> does not exist.', 'Bulk Action', 'error', THIS_URL_FULL);
+					\alerts::push('File <b>'.$file_path.'</b> does not exist.', 'Bulk Action', 'error', THIS_URL_FULL);
 
 				// check if file exists
 				if ($bulk_action === 'push' || $bulk_action === 'delete') {
 					if (!$dir_from->get_file($file_path))
-						push_alert('File <b>'.$file_path.'</b> does not exist on '.($from == 'stag' ? 'staging' : 'production').'.', 'Bulk Action - '.ucwords($bulk_action).' Error', 'error', THIS_URL_FULL);
+						\alerts::push('File <b>'.$file_path.'</b> does not exist on '.($from == 'stag' ? 'staging' : 'production').'.', 'Bulk Action - '.ucwords($bulk_action).' Error', 'error', THIS_URL_FULL);
 				}
 
 				// do action
@@ -204,21 +203,21 @@
 				}
 
 				if (!$result->is_success())
-					push_alert($result->get_msg(), 'Bulk Action', 'error', THIS_URL_FULL);
+					\alerts::push($result->get_msg(), 'Bulk Action', 'error', THIS_URL_FULL);
 			}
 
 			if ($result->is_success())
-				push_alert('Bulk '.$bulk_action.' completed successfully.', 'Bulk Action', 'success', THIS_URL_FULL);
+				\alerts::push('Bulk '.$bulk_action.' completed successfully.', 'Bulk Action', 'success', THIS_URL_FULL);
 			else
-				push_alert($result->get_msg(), 'Bulk Action', 'error', THIS_URL_FULL);
+				\alerts::push($result->get_msg(), 'Bulk Action', 'error', THIS_URL_FULL);
 		}
 	}
 
 	// check directory exists
 
 	if (!file_exists(PATH_PROD))
-		push_alert('Production directory <span style="font-family:monospace;">'.DIR_PROD.'</span> does not exist.', 'Directory Error', 'error');
+		\alerts::push('Production directory <span style="font-family:monospace;">'.DIR_PROD.'</span> does not exist.', 'Directory Error', 'error');
 
 
 	if (!file_exists(PATH_STAG))
-		push_alert('Staging directory <span style="font-family:monospace;">'.DIR_STAG.'</span> does not exist.', 'Directory Error', 'error', false, true);
+		\alerts::push('Staging directory <span style="font-family:monospace;">'.DIR_STAG.'</span> does not exist.', 'Directory Error', 'error', false, true);

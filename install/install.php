@@ -15,7 +15,7 @@
 
 		// install submodules
 		if (!install_the_submodules())
-			push_alert('Could not install one or more submodules.', 'Submodule Install Error', 'error', false, true);
+			\alerts::push('Could not install one or more submodules.', 'Submodule Install Error', 'error', false, true);
 
 		// delete install directory
 		deployment::rrmdir(dirname(__DIR__).'/install');
