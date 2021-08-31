@@ -4,3 +4,9 @@
 [submodule "lib/changes"]
 	path = lib/changes
 	url = git://github.com/edonnel/changes.class.php
+[submodule "lib/csrf"]
+	path = lib/csrf
+	url = https://github.com/edonnel/csrf.class.php
+[submodule "lib/alerts"]
+	path = lib/alerts
+	url = https://github.com/edonnel/alerts.class.php
