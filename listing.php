@@ -11,7 +11,7 @@
             if (file_exists($theme_path = (THIS_DIR.'/src/css/themes/'.THEME.'.css')))
                 require_once $theme_path;
             else
-                push_alert('Theme file <b>'.THEME.'.css</b> does not exist', 'Theme Error', 'error');
+                \alerts::push('Theme file <b>'.THEME.'.css</b> does not exist', 'Theme Error', 'error');
         }
     ?>
 </style>
@@ -31,9 +31,9 @@
     </div>
 </div>
 
-<? $critical = alerts_are_critical(); ?>
+<? $critical = \alerts::are_critical(); ?>
 
-<?= get_alerts(); ?>
+<?= \alerts::get(); ?>
 
 <? if (!$critical) : ?>
 

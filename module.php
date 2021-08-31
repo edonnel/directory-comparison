@@ -7,12 +7,13 @@
 
 	const THIS_DIR = __DIR__;
 
-	// start the session
-	if (session_status() === PHP_SESSION_NONE)
-		session_start();
-
 	// load functions
 	require_once THIS_DIR.'/src/php/functions.php';
+	require_once THIS_DIR.'/lib/csrf/csrf.class.php';
+	require_once THIS_DIR.'/lib/alerts/alerts.class.php';
+
+	// start the session
+	start_the_session();
 
 	// load custom functions
 	if (file_exists(THIS_DIR.'/src/php/functions_custom.php'))
@@ -33,11 +34,11 @@
 		require_once THIS_DIR.'/install/install.php';
 
 	// start csrf
-	init_csrf();
+	\csrf::init();
 
 	// check submodules
 	if (!file_exists(__DIR__.'/lib/result/result.class.php') || !file_exists(__DIR__.'/lib/changes/changes.class.php'))
-		push_alert('One of more submodules are not present. Please view the <a href="'.THIS_URL_DIR.'/README.md" target="_blank">README</a> for download instructions.', 'Submodules Missing', 'error', false, true);
+		\alerts::push('One of more submodules are not present. Please view the <a href="'.THIS_URL_DIR.'/README.md" target="_blank">README</a> for download instructions.', 'Submodules Missing', 'error', false, true);
 
 	// load the rest
 	require_once THIS_DIR.'/process.php';

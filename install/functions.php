@@ -139,21 +139,23 @@
 	}
 
 	function install_the_submodules() {
-		$dir_changes = THIS_DIR.'/lib/changes';
-		$dir_result = THIS_DIR.'/lib/result';
+		$submodules = array(
+			array('folder' => 'changes',    'repo' => 'changes.class.php'),
+			array('folder' => 'result',     'repo' => 'result.class.php'),
+			array('folder' => 'csrf',       'repo' => 'csrf.class.php'),
+			array('folder' => 'alerts',     'repo' => 'alerts.class.php'),
+		);
 
-		if (!file_exists($dir_changes) || \directory_comparison\deployment::is_dir_empty($dir_changes)) {
-			$download = download_github_repo('edonnel', 'changes.class.php', 'main', $dir_changes);
+		foreach ($submodules as $submodule) {
 
-			if (!$download)
-				return false;
-		}
+			$dir = THIS_DIR.'/lib/'.$submodule['folder'];
 
-		if (!file_exists($dir_result) || \directory_comparison\deployment::is_dir_empty($dir_result)) {
-			$download = download_github_repo('edonnel', 'result.class.php', 'main', $dir_result);
+			if (!file_exists($dir) || \directory_comparison\deployment::is_dir_empty($dir)) {
+				$download = download_github_repo('edonnel', $submodule['repo'], 'main', $dir);
 
-			if (!$download)
-				return false;
+				if (!$download)
+					return false;
+			}
 		}
 
 		return true;
