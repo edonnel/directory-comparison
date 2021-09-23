@@ -57,7 +57,7 @@
 				'extra'     => '',
 			),
 			'timestamp' => array(
-				'type'      => 'tinyint(1)',
+				'type'      => 'timestamp(1)',
 				'null'      => false,
 				'extra'     => 'DEFAULT CURRENT_TIMESTAMP',
 			),

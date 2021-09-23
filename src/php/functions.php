@@ -1,14 +1,25 @@
 <?
 	namespace directory_comparison;
 
-	function listing(\directory_comparison\directory $directory, \directory_comparison\directory $directory_other, $all_files, $header, $from, $position, $limit = LIMIT_FILES, $start = 0, $just_rows = false) {
+	function listing(
+		\directory_comparison\directory $directory,
+		\directory_comparison\directory $directory_other,
+		$all_files,
+		$header,
+		$from,
+		$position,
+		$limit = LIMIT_FILES,
+		$just_rows = false,
+		$order_type = false,
+		$order_value = false
+	) {
 		if ($from != 'stag' && $from != 'prod')
 			$from = 'stag';
 
 		if ($position != 'left' && $position != 'right')
 			$position = 'left';
 
-		$changed_files = \directory_comparison\directory::get_directory_changes($directory, $directory_other, $all_files, $limit, $start);
+		$changed_files = \directory_comparison\directory::get_directory_changes($directory, $directory_other, $all_files, $limit);
 		$changed_files = $changed_files->get();
 
 		$allow_push = false;
@@ -24,6 +35,15 @@
 			'header'        => $header,
 			'position'      => $position,
 			'allow_push'    => $allow_push,
+			'order_type'    => $order_type,
+			'order_value'   => $order_value,
+			// TODO: find better solution for hiding the "load more" button if all files have already been loaded
+			'all_loaded'    => \directory_comparison\directory::get_directory_changes_all_loaded($directory, $directory_other, $all_files, $limit),
+			'svg'           => array(
+				'sort_numeric_down_alt' => get_svg_icon('sort-numeric-down-alt'),
+				'sort_numeric_up_alt'   => get_svg_icon('sort-numeric-up-alt'),
+				'ellipsis'              => get_svg_icon('ellipsis-h'),
+			),
 		);
 
 		$output = '';

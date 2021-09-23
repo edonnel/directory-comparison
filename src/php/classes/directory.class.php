@@ -5,9 +5,12 @@
 		private $base_dir;
 		private $files;       // array of file objects
 
-		public function __construct($base_dir, $files_to_exclude = array()) {
+		public function __construct($base_dir, $files_to_exclude = array(), $order_type = false, $order_value = false) {
 			$this->base_dir = $base_dir;
 			$this->files = self::get_directory_listing($this->base_dir, $files_to_exclude);
+
+			// order files
+			self::order_files($order_type, $order_value);
 
 			return $this;
 		}
@@ -32,6 +35,7 @@
 		}
 
 		public static function get_directory_listing($dir_path, $files_to_exclude = array(), $limit = 0) : array {
+			// filter excluded files out
 			$filter = function ($iter_file, $key, $iterator) use ($files_to_exclude, $dir_path) {
 				$path       = $iter_file->getPath().'/'.$iter_file->getFilename();
 				$pathname   = str_replace($dir_path, '', $path);
@@ -92,7 +96,7 @@
 				return 0;
 		}
 
-		public static function get_directory_changes(directory $directory, directory $directory_other, $all_files = false, $limit = LIMIT_FILES, $start = 0) : \changes {
+		public static function get_directory_changes(directory $directory, directory $directory_other, $all_files = false, $limit = LIMIT_FILES) : \changes {
 			if (!$all_files)
 				$all_files = self::combine_directories($directory, $directory_other);
 
@@ -132,13 +136,6 @@
 				}
 
 				if (!$dont_add) {
-					$change->set_data('i', $i); // mark for removal. doesn't do anything productive.
-
-					if ($i < $start) {
-						$start--;
-
-						continue;
-					}
 
 					$changes->add($change);
 
@@ -152,9 +149,42 @@
 			return $changes;
 		}
 
+		// get whether the limit has been reached or not
+		public static function get_directory_changes_all_loaded(directory $directory, directory $directory_other, $all_files = false, $limit = LIMIT_FILES) {
+			if (!$all_files)
+				$all_files = self::combine_directories($directory, $directory_other);
+
+			$i = 0;
+
+			foreach ($all_files as $file_path) {
+
+				$file       = $directory->get_file($file_path);
+				$file_other = $directory_other->get_file($file_path);
+				$dont_add   = false;
+
+				if ($file) {
+
+					if ($file_other) {
+
+						$dont_add = $file->is_dir() || $file_other->is_dir();
+
+						if (!($file->get_date() > $file_other->get_date()) && !($file->get_date() < $file_other->get_date()))
+							$dont_add = true;
+					}
+				}
+
+				if (!$dont_add)
+					$i++;
+
+				if ($i > $limit)
+					return false;
+			}
+
+			return true;
+		}
+
 		public static function combine_directories(directory $dir_1, directory $dir_2) {
 			$func_combine = function(directory $dir, $dir_list = array()) {
-//				$files = self::get_flat_directory($dir);
 				$files = $dir->get_files();
 
 				foreach ($files as $file) {
@@ -170,6 +200,34 @@
 			$dirs = $func_combine($dir_2, $dirs);
 
 			return $dirs;
+		}
+
+		private function order_files($order_type, $order_value) {
+			if ($order_type && $order_type != 'default' && $order_value) {
+
+				// date ordering
+				if ($order_type == 'date') {
+					// make a sortable array
+					$array_to_order = array();
+
+					foreach ($this->files as $file)
+						$array_to_order[$file->get_date()] = $file;
+
+					// do the sort
+					if ($order_value == 'asc')
+						ksort($array_to_order);
+					elseif ($order_value == 'desc')
+						krsort($array_to_order);
+
+					// revert to the original array structure
+					$new_array = array();
+
+					foreach ($array_to_order as $file)
+						$new_array[$file->get_path()] = $file;
+
+					$this->files = $new_array;
+				}
+			}
 		}
 	}
 

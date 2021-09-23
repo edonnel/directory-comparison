@@ -1,5 +1,8 @@
 <? namespace directory_comparison; ?>
 
+<link rel="preconnect" href="https://fonts.gstatic.com">
+<link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;700&family=Roboto:ital,wght@0,300;0,400;0,700;1,400&display=swap" rel="stylesheet">
+
 <meta name="csrf-token" content="<?= $_SESSION['csrf_token'] ?>">
 
 <style>
@@ -49,6 +52,7 @@
 
                     <form method="post" id="listing_form_<?= $from ?>" class="listing-form">
                         <input type="hidden" name="from" value="<?= $from ?>" />
+                        <input type="hidden" name="load_all" value="0" id="load_all" />
 
                         <div>
                             <label for="filter_bulk_<?= $from ?>" style="display:none;">Bulk Actions:</label>
@@ -71,16 +75,6 @@
 
             <? endforeach; ?>
 
-        </div>
-
-        <div style="display:flex;justify-content:center;">
-            <div class="load-more" id="load_more_files" data-i="<?= LIMIT_FILES ?>">
-                <div style="padding:10px 15px;">
-                    <span class="icon"><?= get_svg_icon('angle-double-down') ?></span>
-                    Load More
-                    <span class="icon"><?= get_svg_icon('angle-double-down') ?></span>
-                </div>
-            </div>
         </div>
 
     </div>

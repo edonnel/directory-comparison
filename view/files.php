@@ -1,5 +1,7 @@
 <? namespace directory_comparison; ?>
 
+<input type="hidden" id="<?= $from ?>_load_all" value="<?= $all_loaded ?>" />
+
 <table class="listing-files-table table <?= $position ?>" data-from="<?= $from ?>">
     <thead>
         <tr>
@@ -27,7 +29,17 @@
         <tr>
             <td class="category"></td>
             <td class="category">File</td>
-            <td class="category">Date Modified</td>
+            <td class="category col-order order-date" data-type="date" data-value="<?= $order_type == 'date' ? $order_value : '' ?>">
+                <span>Date Modified</span>
+                <span class="col-order-icon">
+                    <?
+                        if ($order_value == 'asc')
+                            echo $svg['sort_numeric_up_alt'];
+                        elseif ($order_value == 'desc')
+                            echo $svg['sort_numeric_down_alt'];
+                    ?>
+                </span>
+            </td>
             <td class="category"></td>
             <td class="category"></td>
             <td class="category"></td>
@@ -35,6 +47,11 @@
         </tr>
         <? if ($changed_files) : ?>
             <?= listing_rows($changed_files, $from) ?>
+
+            <? if ($limit) ?>
+            <tr class="load-more" title="Load All">
+                <td colspan="9999"><?= $svg['ellipsis'] ?></td>
+            </tr>
         <? else : ?>
             <tr>
                 <td colspan="9999"><i>No changed files.</i></td>

@@ -74,23 +74,30 @@ function get_listing_all() {
     $('#last_updated').html(m+'/'+d+'/'+Y+' '+h+':'+i+ampm);
 }
 
-function get_listing_files(from, elem) {
+function get_listing_files(from, elem, change_order, order_type, order_value) {
     show_loading(elem);
 
     $.ajax({
         url:PROCESS_URL,
-        type:'GET',
+        type:'POST',
         dataType:'json',
         data:{
             act:'get_listing_files',
             from:from,
             a:a,
+            load_all:$('#load_all').val(),
+            change_order:change_order,
+            order_type:order_type,
+            order_value:order_value,
         },
         success:function(result) {
             if (result.success)
                 $(elem).html(result.data.html);
             else
                 $(elem).html(result.msg);
+
+            if (result.data.all_loaded || ($('#stag_load_all').val() == 1 && $('#prod_load_all').val() == 1))
+                hide_load_all();
         },
 		error: function (jqXhr, textStatus, errorMessage) {
 			console.error(errorMessage);
@@ -98,82 +105,18 @@ function get_listing_files(from, elem) {
     });
 }
 
-function get_listing_files_more(start) {
-    show_loading('#listing_files_stag');
-    show_loading('#listing_files_prod');
+function get_listing_files_all(change_order, order_type, order_value) {
+    if (!change_order)
+        change_order = false;
 
-    const data = {
-        act:'get_listing_files',
-        a:a,
-        start:start,
-        just_rows:true,
-    };
+    if (!order_type)
+        order_type = '';
 
-    let load_more = function(elem, data, from) {
+    if (!order_value)
+        order_value = '';
 
-        data.from = from;
-
-        $.ajax({
-            url:PROCESS_URL,
-            type:'GET',
-            dataType:'json',
-            data:data,
-            success:function(result) {
-                if (result.success) {
-                    $(elem).find('table tbody').first().append(result.data.html);
-
-                    // if no result, hide button
-                    if (!result.data.html)
-                        $('#load_more_files').hide();
-                } else
-                    alert(result.msg);
-
-                hide_loading(elem);
-            },
-			error: function (jqXhr, textStatus, errorMessage) {
-				console.error(errorMessage);
-			},
-        });
-
-    };
-
-    load_more('#listing_files_stag', data, 'stag');
-    load_more('#listing_files_prod', data, 'prod');
-}
-
-function check_listing_files_more(start) {
-    if (!start && start !== 0)
-        start = get_i();
-
-    $.ajax({
-        url:PROCESS_URL,
-        type:'GET',
-        dataType:'json',
-        data:{
-            act:'get_listing_files',
-            a:a,
-            start:start,
-            just_rows:true,
-            from:'stag',
-        },
-        success:function(result) {
-            if (result.success) {
-                if (!result.data.html)
-                    $('#load_more_files').hide();
-                else
-                    $('#load_more_files').show();
-            } else
-                alert(result.msg);
-        },
-		error: function (jqXhr, textStatus, errorMessage) {
-			console.error(errorMessage);
-		},
-    });
-}
-
-function get_listing_files_all() {
-    get_listing_files('stag', '#listing_files_stag');
-    get_listing_files('prod', '#listing_files_prod');
+    get_listing_files('stag', '#listing_files_stag', change_order, order_type, order_value);
+    get_listing_files('prod', '#listing_files_prod', change_order, order_type, order_value);
 }
 
 function get_listing_ignored() {
@@ -183,7 +126,7 @@ function get_listing_ignored() {
 
     $.ajax({
         url:PROCESS_URL,
-        type:'GET',
+        type:'POST',
         dataType:'json',
         data:{
             act:'get_ignored_files',
@@ -211,7 +154,7 @@ function get_listing_pushed(pag) {
 
     $.ajax({
         url:PROCESS_URL,
-        type:'GET',
+        type:'POST',
         dataType:'json',
         data:{
             act:'get_pushed_files',
@@ -233,7 +176,7 @@ function get_listing_pushed(pag) {
 function push_file(file, from) {
     $.ajax({
         url:PROCESS_URL,
-        type:'GET',
+        type:'POST',
         dataType:'json',
         data:{
             act:'push',
@@ -254,7 +197,7 @@ function push_file(file, from) {
 function delete_file(file, from) {
     $.ajax({
         url:PROCESS_URL,
-        type:'GET',
+        type:'POST',
         dataType:'json',
         data:{
             act:'delete',
@@ -274,7 +217,7 @@ function delete_file(file, from) {
 function ignore_file(file, type) {
     $.ajax({
         url:PROCESS_URL,
-        type:'GET',
+        type:'POST',
         dataType:'json',
         data:{
             act:'ignore',
@@ -294,7 +237,7 @@ function ignore_file(file, type) {
 function unignore_file(file) {
     $.ajax({
         url:PROCESS_URL,
-        type:'GET',
+        type:'POST',
         dataType:'json',
         data:{
             act:'unignore',
@@ -313,7 +256,7 @@ function unignore_file(file) {
 function save_notes(notes) {
     $.ajax({
         url:PROCESS_URL,
-        type:'GET',
+        type:'POST',
         dataType:'json',
         data:{
             act:'save_notes',
@@ -417,9 +360,16 @@ function hide_loading(elem) {
     $(elem).find('.'+loader_class+'-container').remove();
 }
 
-// get pagination of files (starting index)
-function get_i() {
-    return parseInt($('#load_more_files').attr('data-i'));
+function load_all() {
+    $('#load_all').val(1);
+
+    get_listing_files_all();
+
+    hide_load_all();
+}
+
+function hide_load_all() {
+    $('head').append('<style class="stylesheet-load-more">.listing-files .load-more{display:none;}</style>');
 }
 
 load_jquery(function() {
@@ -452,17 +402,14 @@ load_jquery(function() {
                 });
             }, transition_time);
 
+            $('#load_all').val(0);
+            $('.stylesheet-load-more').remove();
+
             get_listing_all();
-
-            $('#load_more_files').attr('data-i', FILES_LIMIT);
-
-            check_listing_files_more();
         });
-
-        // check to see if load more
-        check_listing_files_more();
     });
 
+    // on pushed files listing first button click
     $(document).on('click', '#pag_pushed .pag-first', function() {
         const current = $(this).parents('.pag').data('current');
 
@@ -471,6 +418,7 @@ load_jquery(function() {
         }
     });
 
+    // on pushed files listing prev button click
     $(document).on('click', '#pag_pushed .pag-prev', function() {
         const current = $(this).parents('.pag').data('current');
         const next = current - 1;
@@ -480,6 +428,7 @@ load_jquery(function() {
         }
     });
 
+    // on pushed files listing next button click
     $(document).on('click', '#pag_pushed .pag-next', function() {
         const current   = $(this).parents('.pag').data('current');
         const total     = $(this).parents('.pag').data('total');
@@ -490,6 +439,7 @@ load_jquery(function() {
         }
     });
 
+    // on pushed files listing last button click
     $(document).on('click', '#pag_pushed .pag-last', function() {
         const current   = $(this).parents('.pag').data('current');
         const total     = $(this).parents('.pag').data('total');
@@ -499,11 +449,7 @@ load_jquery(function() {
         }
     });
 
-    // see more pushed files
-    $(document).on('click', '.more', function() {
-
-    });
-
+    // on file listing action click
     $(document).on('click', '.listing .listing-action', function() {
         const from = $(this).parents('.listing-files-table').attr('data-from');
         const file = $(this).parents('.row-file').attr('data-file');
@@ -525,20 +471,33 @@ load_jquery(function() {
         }
     });
 
+    // on add ignore click
     $(document).on('click', '#add_ignore', function() {
         $('#modal_ignore').modal();
     });
 
-    $(document).on('click', '.listing-files .row-file', function() {
+    // on ordering column click
+    $(document).on('click', '.col-order', function() {
+        const order_type   = $(this).attr('data-type');
+        const order_value   = $(this).attr('data-value');
+
+        // turn comma separated list into array
+        get_listing_files_all(true, order_type, order_value);
+    });
+
+    // on file row click
+    $(document).on('click', '.listing-files .row-file td:not(.col-action)', function() {
+        const $THIS_ROW = $(this).parent('.row-file');
+
         // toggle checkbox
-        const $checkbox = $(this).find('input[type=checkbox]');
+        const $checkbox = $THIS_ROW.find('input[type=checkbox]');
 
         $checkbox.prop('checked', !$checkbox.prop('checked'));
 
         if ($checkbox.prop('checked'))
-            $(this).attr('data-selected', 'true');
+            $THIS_ROW.attr('data-selected', 'true');
         else
-            $(this).attr('data-selected', 'false');
+            $THIS_ROW.attr('data-selected', 'false');
 
         // toggle options in bulk action box
         const listings = ['#listing_form_stag', '#listing_form_prod'];
@@ -604,10 +563,17 @@ load_jquery(function() {
         }
     });
 
+    // on load more click
+    $(document).on('click', '.load-more', function() {
+        load_all();
+    });
+
+    // on modal close click
     $('#modal_ignore_close').on('click', function() {
         $('#modal_ignore').modal('close');
     });
 
+    // on modal save click
     $('#modal_ignore_save').on('click', function() {
         const val   = $('#modal_ignore_path').val();
         const type  = $('#modal_ignore_type').val();
@@ -620,21 +586,10 @@ load_jquery(function() {
             alert('Ignore path cannot be blank.');
     });
 
+    // on notes save click
     $('#notes_submit').on('click', function() {
         const notes = $('#notes').val();
 
         save_notes(notes);
     });
-
-    $('#load_more_files').on('click', function() {
-        const i         = get_i();
-        const next_i    = i + FILES_LIMIT;
-
-        get_listing_files_more(i);
-
-        $('#load_more_files').attr('data-i', next_i);
-
-        check_listing_files_more(next_i);
-    });
-
 });
