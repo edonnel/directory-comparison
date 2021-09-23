@@ -46,12 +46,14 @@
         </div>
     </td>
 	<td class="dates <?= in_array('newer', $reasons) || in_array('older', $reasons)  ? 'diff-dates' : '' ?>" style="width:1px;white-space:nowrap;">
-		<table class="inner-table">
-			<tr>
-				<td class="date date-stag" style="width:1px;white-space:nowrap;"><?= date('m/d/Y G:i:s', $file->get_date()) ?></td>
-				<td style="width:1px;white-space:nowrap;padding:0 12px 0 0;"><?= in_array('newer', $reasons) ? '>' : '' ?> <?= in_array('older', $reasons)  ? '<' : '' ?></td>
-			</tr>
-		</table>
+        <? if (!in_array('no', $reasons)) : ?>
+            <table class="inner-table">
+                <tr>
+                    <td class="date date-stag" style="width:1px;white-space:nowrap;"><?= date('m/d/Y G:i:s', $file->get_date()) ?></td>
+                    <td style="width:1px;white-space:nowrap;padding:0 12px 0 0;"><?= in_array('newer', $reasons) ? '>' : '' ?> <?= in_array('older', $reasons)  ? '<' : '' ?></td>
+                </tr>
+            </table>
+        <? endif; ?>
 	</td>
 	<td style="width:1px;padding:0;"></td>
 	<td class="col-action">

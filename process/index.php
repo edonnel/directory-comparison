@@ -41,63 +41,188 @@
 		$result->echo_json(true);
 	}
 
-	$files_to_exclude   = deployment::get_ignored_files($conn, null, null, false);
-	$dir_stag           = new directory(PATH_STAG, $files_to_exclude);
-	$dir_prod           = new directory(PATH_PROD, $files_to_exclude);
-
+	// init result
 	$result = new \result;
 	$result
 		->set_msg('Nothing happened.')
 		->set_data('title', 'Error')
 		->set_data('type', 'error');
 
-	if ($_GET['act'] == 'get_listing_files') {
+	if (
+		$_POST['act'] == 'get_listing_files' ||
+		$_POST['act'] == 'push' ||
+		$_POST['act'] == 'delete' ||
+		$_POST['act'] == 'ignore'
+	) {
 
-		if (!($from = $_GET['from'])) {
-			$result
-				->set_success(false)
-				->set_msg('From parameter not specified.')
-				->set_data('title', 'Error')
-				->set_data('type', 'error');
-		} else {
-			if ($from == 'stag') {
-				$dir_from   = $dir_stag;
-				$dir_to     = $dir_prod;
-				$header     = 'Files on Staging';
-				$position   = 'Left';
-			} else {
-				$dir_from   = $dir_prod;
-				$dir_to     = $dir_stag;
-				$header     = 'Files on Production';
-				$position   = 'Right';
+		// ordering
+		$order_date_options = array('asc', 'desc');
+		$order_type         = $_POST['order_type'] ?? false;
+		$order_value        = false;
+
+		if ($_POST['change_order']) {
+
+			if ($order_type == 'date') {
+
+				$key = array_search($_POST['order_value'], $order_date_options);
+
+				if ($key !== false) {
+
+					if (!isset($order_date_options[$key + 1]))
+						$order_value = '';
+					else {
+
+						// move to next item
+						$order_value = $order_date_options[$key + 1];
+					}
+				} else
+					$order_value = $order_date_options[0];
 			}
-
-			$all_files = directory::combine_directories($dir_stag, $dir_prod);
-
-			if (isset($_GET['limit']) && is_integer($_GET['limit']))
-				$limit = $_GET['limit'];
-			else
-				$limit = LIMIT_FILES;
-
-			if (isset($_GET['start']) && $_GET['start'])
-				$start = $_GET['start'];
-			else
-				$start = 0;
-
-			if (isset($_GET['just_rows']))
-				$just_rows = $_GET['just_rows'];
-			else
-				$just_rows = false;
-
-			$html = listing($dir_from, $dir_to, $all_files, $header, $from, $position, $limit, $start, $just_rows);
-
-			$result
-				->set_success(true)
-				->set_data('html', $html);
 		}
+
+		// variables
+		$files_to_exclude   = deployment::get_ignored_files($conn, null, null, false);
+		$dir_stag           = new directory(PATH_STAG, $files_to_exclude, $order_type, $order_value);
+		$dir_prod           = new directory(PATH_PROD, $files_to_exclude, $order_type, $order_value);
+
+		//--  get listing of changed files
+
+		if ($_POST['act'] == 'get_listing_files') {
+
+			if (!($from = $_POST['from'])) {
+				$result
+					->set_success(false)
+					->set_msg('From parameter not specified.')
+					->set_data('title', 'Error')
+					->set_data('type', 'error');
+			} else {
+				if ($from == 'stag') {
+					$dir_from   = $dir_stag;
+					$dir_to     = $dir_prod;
+					$header     = 'Files on Staging';
+					$position   = 'Left';
+				} else {
+					$dir_from   = $dir_prod;
+					$dir_to     = $dir_stag;
+					$header     = 'Files on Production';
+					$position   = 'Right';
+				}
+
+				$all_files = directory::combine_directories($dir_stag, $dir_prod);
+
+				if (isset($_POST['limit']) && is_integer($_POST['limit']))
+					$limit = $_POST['limit'];
+				else
+					$limit = LIMIT_FILES;
+
+				if ($_POST['load_all'])
+					$limit = 9999999;
+
+				$just_rows = $_POST['just_rows'] ?? false;
+
+				$html = listing($dir_from, $dir_to, $all_files, $header, $from, $position, $limit, $just_rows, $order_type, $order_value);
+
+				$result
+					->set_success(true)
+					->set_data('html', $html)
+					->set_data('all_loaded', $_POST['load_all'] || count($all_files) <= $limit);
+			}
+		}
+
+		//-- push
+
+		if ($_POST['act'] == 'push') {
+
+			$result = new \result;
+
+			if ($file = $_POST['file']) {
+
+				if ($from = $_POST['from']) {
+
+					if ($from == 'stag') {
+						$dir_from   = $dir_stag;
+						$dir_to     = $dir_prod;
+					} else {
+						$dir_from   = $dir_prod;
+						$dir_to     = $dir_stag;
+					}
+
+					if ($backup_file = $dir_to->get_file($file))
+						deployment::backup_file($backup_file->get_full_path());
+
+					$result = deployment::push_file($conn, $file, $dir_from, $dir_to, $from);
+				} else {
+					$result
+						->set_success(false)
+						->set_msg('From parameter not specified.')
+						->set_data('title', 'Error')
+						->set_data('type', 'error');
+				}
+			} else {
+				$result
+					->set_success(false)
+					->set_msg('File not specified.')
+					->set_data('title', 'Error')
+					->set_data('type', 'error');
+			}
+		}
+
+		//-- delete
+
+		if ($_POST['act'] == 'delete') {
+
+			$result = new \result;
+
+			if ($file = $_POST['file']) {
+
+				if ($from = $_POST['from']) {
+
+					if ($from == 'stag')
+						$dir = $dir_stag;
+					else
+						$dir = $dir_prod;
+
+					deployment::backup_file($dir->get_file($file)->get_full_path());
+
+					$result = deployment::delete_file($conn, $file, $dir, $from);
+				} else {
+					$result
+						->set_success(false)
+						->set_msg('From parameter not specified.')
+						->set_data('title', 'Error')
+						->set_data('type', 'error');
+				}
+			} else {
+				$result
+					->set_success(false)
+					->set_msg('File not specified.')
+					->set_data('title', 'Error')
+					->set_data('type', 'error');
+			}
+		}
+
+		//-- ignore
+
+		if ($_POST['act'] == 'ignore') {
+
+			$result = new \result;
+
+			if ($file = $_POST['file']) {
+				$result = deployment::ignore_file($conn, $file, $dir_stag, $dir_prod, $_POST['type']);
+			} else {
+				$result
+					->set_success(false)
+					->set_msg('File not specified.')
+					->set_data('title', 'Error')
+					->set_data('type', 'error');
+			}
+		}
+
 	}
 
-	if ($_GET['act'] == 'get_ignored_files') {
+	//-- get listing of ignored files
+
+	if ($_POST['act'] == 'get_ignored_files') {
 		$html = listing_ignored($conn);
 
 		$result
@@ -105,9 +230,11 @@
 			->set_data('html', $html);
 	}
 
-	if ($_GET['act'] == 'get_pushed_files') {
+	//-- get listing of previously pushed files
 
-		$page = isset($_GET['pag']) && $_GET['pag'] ? $_GET['pag'] : 1;
+	if ($_POST['act'] == 'get_pushed_files') {
+
+		$page = isset($_POST['pag']) && $_POST['pag'] ? $_POST['pag'] : 1;
 
 		$html = listing_pushed($conn, $page);
 
@@ -116,102 +243,13 @@
 			->set_data('html', $html);
 	}
 
-	// push
+	//-- unignore
 
-	if ($_GET['act'] == 'push') {
-
-		$result = new \result;
-
-		if ($file = $_GET['file']) {
-
-			if ($from = $_GET['from']) {
-
-				if ($from == 'stag') {
-					$dir_from   = $dir_stag;
-					$dir_to     = $dir_prod;
-				} else {
-					$dir_from   = $dir_prod;
-					$dir_to     = $dir_stag;
-				}
-
-				if ($backup_file = $dir_to->get_file($file))
-					deployment::backup_file($backup_file->get_full_path());
-
-				$result = deployment::push_file($conn, $file, $dir_from, $dir_to, $from);
-			} else {
-				$result
-					->set_success(false)
-					->set_msg('From parameter not specified.')
-					->set_data('title', 'Error')
-					->set_data('type', 'error');
-			}
-		} else {
-			$result
-				->set_success(false)
-				->set_msg('File not specified.')
-				->set_data('title', 'Error')
-				->set_data('type', 'error');
-		}
-	}
-
-	// delete
-
-	if ($_GET['act'] == 'delete') {
+	if ($_POST['act'] == 'unignore') {
 
 		$result = new \result;
 
-		if ($file = $_GET['file']) {
-
-			if ($from = $_GET['from']) {
-
-				if ($from == 'stag')
-					$dir = $dir_stag;
-				else
-					$dir = $dir_prod;
-
-				deployment::backup_file($dir->get_file($file)->get_full_path());
-
-				$result = deployment::delete_file($conn, $file, $dir, $from);
-			} else {
-				$result
-					->set_success(false)
-					->set_msg('From parameter not specified.')
-					->set_data('title', 'Error')
-					->set_data('type', 'error');
-			}
-		} else {
-			$result
-				->set_success(false)
-				->set_msg('File not specified.')
-				->set_data('title', 'Error')
-				->set_data('type', 'error');
-		}
-	}
-
-	// ignore
-
-	if ($_GET['act'] == 'ignore') {
-
-		$result = new \result;
-
-		if ($file = $_GET['file']) {
-			$result = deployment::ignore_file($conn, $file, $dir_stag, $dir_prod, $_GET['type']);
-		} else {
-			$result
-				->set_success(false)
-				->set_msg('File not specified.')
-				->set_data('title', 'Error')
-				->set_data('type', 'error');
-		}
-	}
-
-	// unignore
-
-	if ($_GET['act'] == 'unignore') {
-
-		$result = new \result;
-
-		if ($file = $_GET['file']) {
+		if ($file = $_POST['file']) {
 			$result = deployment::unignore_file($conn, $file);
 		} else {
 			$result
@@ -222,13 +260,13 @@
 		}
 	}
 
-	// save notes
+	//-- save notes
 
-	if ($_GET['act'] == 'save_notes') {
+	if ($_POST['act'] == 'save_notes') {
 
-		if (isset($_GET['notes'])) {
+		if (isset($_POST['notes'])) {
 
-			$notes = mysqli_real_escape_string($conn, $_GET['notes']);
+			$notes = mysqli_real_escape_string($conn, $_POST['notes']);
 
 			$stmt   = "UPDATE `staging_files_settings` SET `notes` = '$notes' WHERE `id` = 1 LIMIT 1";
 			$query  = $conn->query($stmt);
@@ -256,5 +294,5 @@
 
 	}
 
-
+	// echo the result
 	$result->echo_json();
