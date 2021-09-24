@@ -224,3 +224,33 @@
 		if (session_status() === PHP_SESSION_NONE)
 			@session_start();
 	}
+
+	function check_submodules_exist() {
+		$submodules = array(
+			'result'    => THIS_DIR.'/lib/result/result.class.php',
+			'changes'   => THIS_DIR.'/lib/changes/changes.class.php',
+			'csrf'      => THIS_DIR.'/lib/csrf/csrf.class.php',
+			'alerts'    => THIS_DIR.'/lib/alerts/alerts.class.php',
+		);
+
+		$submodules_missing = array();
+
+		foreach ($submodules as $key => $submodule) {
+			if (!file_exists($submodule))
+				$submodules_missing[$key] = $submodule;
+		}
+
+		if ($submodules_missing) {
+			foreach ($submodules_missing as $submodule_name => $submodule) {
+				$msg = 'Submodule <b>'.$submodule_name.'</b> is not present. Please view the <a href="'.THIS_URL_DIR.'/README.md" target="_blank">README</a> for download instructions.';
+
+				if (class_exists('alerts')) {
+					\alerts::push($msg, 'Submodule(s) Missing', 'error', false, true);
+					echo \alerts::get();
+				} else
+					echo '<div>'.$msg.'</div>';
+			}
+
+			die();
+		}
+	}

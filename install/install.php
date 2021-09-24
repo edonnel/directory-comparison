@@ -14,8 +14,14 @@
 		install_the_tables($conn, $tables);
 
 		// install submodules
-		if (!install_the_submodules())
-			\alerts::push('Could not install one or more submodules.', 'Submodule Install Error', 'error', false, true);
+		if (!install_the_submodules()) {
+			$msg = 'Could not install one or more submodules.';
+
+			if (class_exists('alerts'))
+				\alerts::push($msg, 'Submodule Install Error', 'error', false, true);
+			else
+				echo '<div>'.$msg.'</div>';
+		}
 
 		// delete install directory
 		deployment::rrmdir(dirname(__DIR__).'/install');

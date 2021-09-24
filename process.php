@@ -44,7 +44,7 @@
 			$dir_to     = $dir_prod;
 			$from       = 'stag';
 
-			$changes        = directory::get_directory_changes($dir_from, $dir_to, $all_files);
+			$changes        = directory::get_directory_changes($dir_from, $dir_to, $all_files, 999999);
 			$changed_files  = $changes->get();
 			$files          = array();
 
@@ -72,13 +72,13 @@
 
 		// sync staging
 
-		if (isset($_POST['sync'])) {
+		if (isset($_POST['sub_sync'])) {
 
 			$dir_from   = $dir_prod;
 			$dir_to     = $dir_stag;
 			$from       = 'prod';
 
-			$changes        = directory::get_directory_changes($dir_from, $dir_to, $all_files);
+			$changes        = directory::get_directory_changes($dir_from, $dir_to, $all_files, 999999);
 			$changed_files  = $changes->get();
 			$files          = array();
 
@@ -118,7 +118,7 @@
 			$dir_to     = $dir_prod;
 			$from       = 'stag';
 
-			$changes        = directory::get_directory_changes($dir_from, $dir_to, $all_files);
+			$changes        = directory::get_directory_changes($dir_from, $dir_to, $all_files, 999999);
 			$changed_files  = $changes->get();
 			$files          = array();
 
