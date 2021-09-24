@@ -68,10 +68,10 @@
 						break;
 
 					if (!$conn->next_result())
-						die($conn->error);
+						die('SQL error: '.$conn->error.'<br>'.$stmt);
 				} while (true);
 			} else
-				die($conn->error);
+				die('SQL error: '.$conn->error.'<br>'.$stmt);
 		}
 	}
 
