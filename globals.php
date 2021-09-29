@@ -1,6 +1,8 @@
 <?
 	namespace directory_comparison;
 
+	const version = '1.7.0';
+
 	if (!defined('THIS_DIR'))
 		define('THIS_DIR', __DIR__);
 

@@ -215,9 +215,9 @@
 
 					// do the sort
 					if ($order_value == 'asc')
-						ksort($array_to_order);
-					elseif ($order_value == 'desc')
 						krsort($array_to_order);
+					elseif ($order_value == 'desc')
+						ksort($array_to_order);
 
 					// revert to the original array structure
 					$new_array = array();

@@ -68,6 +68,13 @@
             </div>
 		<? endif; ?>
 	</td>
+    <td class="col-action">
+        <? if ($file->is_dir() && (in_array('new', $reasons) || in_array('older', $reasons)  || in_array('newer', $reasons))) : ?>
+            <div class="listing-action" data-act="push_dir" title="Push Entire Directory To <?= $from == 'prod' ? 'Staging' : 'Production' ?>">
+                <span class="icon action push-dir"><?= $svg['arrow-down'] ?></span>
+            </div>
+        <? endif; ?>
+    </td>
 	<td class="col-action">
 		<? if (in_array('new', $reasons) || in_array('older', $reasons)  || in_array('newer', $reasons)) : ?>
             <div class="listing-action" data-act="push" title="Push To <?= $from == 'prod' ? 'Staging' : 'Production' ?>">

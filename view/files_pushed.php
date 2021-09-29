@@ -1,6 +1,6 @@
 <? namespace directory_comparison; ?>
 
-<table class="table condensed">
+<table class="dc-table condensed">
 	<thead>
 		<tr>
 			<td colspan="9999">
@@ -10,13 +10,13 @@
 	</thead>
 	<tbody>
 		<tr>
-			<td class="category" style="width:1px;white-space:nowrap;"></td>
-			<td class="category">File</td>
-			<td class="category">From</td>
-			<td class="category"></td>
-			<td class="category">To</td>
-			<td class="category"></td>
-			<td class="category">Date Pushed</td>
+			<td class="table-header" style="width:1px;white-space:nowrap;"></td>
+			<td class="table-header">File</td>
+			<td class="table-header">From</td>
+			<td class="table-header"></td>
+			<td class="table-header">To</td>
+			<td class="table-header"></td>
+			<td class="table-header">Date Pushed</td>
 		</tr>
 		<? if ($pushed_files) : ?>
 			<? foreach ($pushed_files as $file) : ?>

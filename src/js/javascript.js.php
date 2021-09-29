@@ -194,6 +194,27 @@ function push_file(file, from) {
     });
 }
 
+function push_dir(file, from) {
+    $.ajax({
+        url:PROCESS_URL,
+        type:'POST',
+        dataType:'json',
+        data:{
+            act:'push_dir',
+            file:file,
+            from:from,
+        },
+        success:function(result) {
+            show_msg(result.msg, result.data.title, result.data.type);
+            get_listing_files_all();
+            get_listing_pushed();
+        },
+        error: function (jqXhr, textStatus, errorMessage) {
+            console.error(errorMessage);
+        },
+    });
+}
+
 function delete_file(file, from) {
     $.ajax({
         url:PROCESS_URL,
@@ -372,6 +393,29 @@ function hide_load_all() {
     $('head').append('<style class="stylesheet-load-more">.listing-files .load-more{display:none;}</style>');
 }
 
+function clear_selection() {
+    if (window.getSelection)
+        window.getSelection().removeAllRanges();
+    else if (document.selection)
+        document.selection.empty();
+}
+
+function dc_select_row($row, toggle) {
+    if ($row instanceof jQuery) {
+        const $checkbox = $row.find('input[type=checkbox]');
+        var select_it   = true;
+
+        if (toggle) {
+
+            select_it = !$checkbox.prop('checked');
+        }
+
+        $row.attr('data-selected', (select_it ? 'true' : 'false'));
+        $checkbox.prop('checked', select_it);
+    } else
+        console.error($row+' is not a jQuery object.');
+}
+
 load_jquery(function() {
 
     const CSRF_TOKEN    = $('meta[name="csrf-token"]').attr('content');
@@ -459,6 +503,9 @@ load_jquery(function() {
             case 'push':
                 push_file(file, from);
                 break;
+            case 'push_dir':
+                push_dir(file, from);
+                break;
             case 'delete':
                 delete_file(file, from);
                 break;
@@ -486,18 +533,40 @@ load_jquery(function() {
     });
 
     // on file row click
-    $(document).on('click', '.listing-files .row-file td:not(.col-action)', function() {
-        const $THIS_ROW = $(this).parent('.row-file');
+    $(document).on('click', '.listing-files .row-file td:not(.col-action)', function(e) {
 
-        // toggle checkbox
+        // clear current selection
+        clear_selection();
+
+        // constants
+        const $ROWS                 = $(this).parents('.listing-files');
+        const $THIS_ROW             = $(this).parent('.row-file');
+        const $LAST_SELECTED_ROW    = $ROWS.find('.row-file[data-last-selected="true"]');
         const $checkbox = $THIS_ROW.find('input[type=checkbox]');
 
-        $checkbox.prop('checked', !$checkbox.prop('checked'));
+        // select/check the row
+        dc_select_row($THIS_ROW, true);
 
-        if ($checkbox.prop('checked'))
-            $THIS_ROW.attr('data-selected', 'true');
-        else
-            $THIS_ROW.attr('data-selected', 'false');
+        // select multiple
+        if (e.shiftKey) {
+            const index_this_row = $THIS_ROW.index();
+            const index_last_row = $LAST_SELECTED_ROW.index();
+            var $multiple_rows = null;
+
+            if (index_this_row > index_last_row)
+                $multiple_rows = $LAST_SELECTED_ROW.nextUntil($THIS_ROW).addBack().add($THIS_ROW);
+            else
+                $multiple_rows = $LAST_SELECTED_ROW.prevUntil($THIS_ROW).addBack().add($THIS_ROW);
+
+            if ($multiple_rows) {
+
+                for (let i = 0; i < $multiple_rows.length; i++) {
+                    let $row = $($multiple_rows[i]);
+
+                    dc_select_row($row);
+                }
+            }
+        }
 
         // toggle options in bulk action box
         const listings = ['#listing_form_stag', '#listing_form_prod'];
@@ -509,6 +578,9 @@ load_jquery(function() {
             var type_no         = false;
             var type_diff       = false;
             var one_checked     = false;
+
+            // unselect last selected
+            $(listing+' .row-file').removeAttr('data-last-selected');
 
             // iterate through rows and get change types
             $(listing+' .row-file').each(function (index, element) {
@@ -561,6 +633,12 @@ load_jquery(function() {
                 $(listing).find('.bulk-sub').attr('disabled', 'disabled');
             }
         }
+
+        // make this last selected
+        if ($checkbox.prop('checked'))
+            $THIS_ROW.attr('data-last-selected', 'true');
+        else
+            $THIS_ROW.removeAttr('data-last-selected');
     });
 
     // on load more click
@@ -579,7 +657,7 @@ load_jquery(function() {
         const type  = $('#modal_ignore_type').val();
 
         if (val !== '' && val !== ' ') {
-            ignore_file(val, type);
+            ignore_file('/'+val, type);
 
             $('#modal_ignore').modal('close');
         } else
