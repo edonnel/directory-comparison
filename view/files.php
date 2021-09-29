@@ -2,14 +2,14 @@
 
 <input type="hidden" id="<?= $from ?>_load_all" value="<?= $all_loaded ?>" />
 
-<table class="listing-files-table table <?= $position ?>" data-from="<?= $from ?>">
+<table class="listing-files-table dc-table <?= $position ?>" data-from="<?= $from ?>">
     <thead>
         <tr>
             <td colspan="9999">
                 <?= $header ?>
 
                 <? if ($from == 'stag' && $allow_push) : ?>
-                <div class="r">
+                <div style="float:right;">
                     <input type="submit" name="sub_push_all_newer" value="Push New and Recently Modified" title="Pushes only new files and files that have newer modified dates" />
                     &nbsp;
                     <input type="submit" name="sub_push_all" value="Push" title="Pushes all files. Does not delete files." />
@@ -17,7 +17,7 @@
                 <? endif; ?>
 
                 <? if ($from == 'prod' && $allow_push) : ?>
-                    <div class="r">
+                    <div style="float:right;">
                         &nbsp;
                         <input type="submit" name="sub_sync" value="Sync Staging" title="Pushes files and deletes files on staging that do not exist on production." />
                     </div>
@@ -27,9 +27,9 @@
     </thead>
     <tbody>
         <tr>
-            <td class="category"></td>
-            <td class="category">File</td>
-            <td class="category col-order order-date" data-type="date" data-value="<?= $order_type == 'date' ? $order_value : '' ?>">
+            <td class="table-header"></td>
+            <td class="table-header">File</td>
+            <td class="table-header col-order order-date" data-type="date" data-value="<?= $order_type == 'date' ? $order_value : '' ?>">
                 <span>Date Modified</span>
                 <span class="col-order-icon">
                     <?
@@ -40,10 +40,11 @@
                     ?>
                 </span>
             </td>
-            <td class="category"></td>
-            <td class="category"></td>
-            <td class="category"></td>
-            <td class="category"></td>
+            <td class="table-header"></td>
+            <td class="table-header"></td>
+            <td class="table-header"></td>
+            <td class="table-header"></td>
+            <td class="table-header"></td>
         </tr>
         <? if ($changed_files) : ?>
             <?= listing_rows($changed_files, $from) ?>

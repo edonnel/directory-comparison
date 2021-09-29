@@ -60,11 +60,12 @@
 	function listing_rows(array $changed_files, $from) {
 		$output = '';
 		$data   = array('svg' => array(
-			'ignore'    => get_svg_icon('ban'),
-			'trash'     => get_svg_icon('trash'),
-			'arrow'     => $from == 'stag' ? get_svg_icon('long-arrow-alt-right') : get_svg_icon('long-arrow-alt-left'),
-			'file'      => get_svg_icon('file'),
-			'folder'    => get_svg_icon('folder-open'),
+			'ignore'        => get_svg_icon('ban'),
+			'trash'         => get_svg_icon('trash'),
+			'arrow'         => $from == 'stag' ? get_svg_icon('long-arrow-alt-right') : get_svg_icon('long-arrow-alt-left'),
+			'arrow-down'    => get_svg_icon('level-down-alt'),
+			'file'          => get_svg_icon('file'),
+			'folder'        => get_svg_icon('folder-open'),
 		));
 
 		foreach ($changed_files as $changed_file)

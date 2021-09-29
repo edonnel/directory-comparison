@@ -1,10 +1,10 @@
-<table class="table condensed">
+<table class="dc-table condensed">
 	<thead>
 		<tr>
 			<td colspan="9999">
 				Ignored Files & Directories
 
-                <div class="r">
+                <div style="float:right;">
                     &nbsp;
                     <input id="add_ignore" type="button" value="Add Ignore" />
                 </div>
@@ -13,11 +13,11 @@
 	</thead>
 	<tbody>
 		<tr>
-			<td class="category" style="width:1px;white-space:nowrap;"></td>
-			<td class="category">File</td>
-			<td class="category"></td>
-            <td class="category"></td>
-            <td class="category"></td>
+			<td class="table-header" style="width:1px;"></td>
+			<td class="table-header">File</td>
+			<td class="table-header"></td>
+            <td class="table-header"></td>
+            <td class="table-header"></td>
 		</tr>
 		<? if ($ignored_files) : ?>
 			<? foreach ($ignored_files as $file) : ?>
@@ -53,7 +53,7 @@
 					<td class="col-action">
                         <? if ($file['file_path'] && isset($file['inherit']) && !$file['inherit']) : ?>
                             <div class="listing-action" data-act="unignore" title="Unignore">
-                                <span class="icon action ignore"><?= $svg['unignore'] ?></span>
+                                <span class="icon action unignore"><?= $svg['unignore'] ?></span>
                             </div>
                         <? endif; ?>
 					</td>

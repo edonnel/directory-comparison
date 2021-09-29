@@ -48,12 +48,15 @@
 		->set_data('title', 'Error')
 		->set_data('type', 'error');
 
-	if (
-		$_POST['act'] == 'get_listing_files' ||
-		$_POST['act'] == 'push' ||
-		$_POST['act'] == 'delete' ||
-		$_POST['act'] == 'ignore'
-	) {
+	$valid_acts = array(
+		'get_listing_files',
+		'push',
+		'push_dir',
+		'delete',
+		'ignore',
+	);
+
+	if (in_array($_POST['act'], $valid_acts)) {
 
 		// ordering
 		$order_date_options = array('asc', 'desc');
@@ -151,6 +154,67 @@
 						deployment::backup_file($backup_file->get_full_path());
 
 					$result = deployment::push_file($conn, $file, $dir_from, $dir_to, $from);
+				} else {
+					$result
+						->set_success(false)
+						->set_msg('From parameter not specified.')
+						->set_data('title', 'Error')
+						->set_data('type', 'error');
+				}
+			} else {
+				$result
+					->set_success(false)
+					->set_msg('File not specified.')
+					->set_data('title', 'Error')
+					->set_data('type', 'error');
+			}
+		}
+
+		//-- push entire directory
+
+		if ($_POST['act'] == 'push_dir') {
+
+			$result = new \result;
+
+			if ($dir = $_POST['file']) {
+
+				if ($from = $_POST['from']) {
+
+					if ($from == 'stag') {
+						$dir_from   = $dir_stag;
+						$dir_to     = $dir_prod;
+					} else {
+						$dir_from   = $dir_prod;
+						$dir_to     = $dir_stag;
+					}
+
+					// make sure it's a directory
+					if (is_dir(($dir_full = $dir_from->get_dir().'/'.$dir))) {
+
+						$children = directory::get_directory_listing($dir_full);
+
+						foreach ($children as $child_file_path => $child) {
+
+							$child_file_path = $dir.$child_file_path;
+
+							$child_file = $dir_from->get_file($child_file_path);
+
+							if ($child_file) {
+
+								// back up the file if it exists
+								if ($backup_file = $dir_to->get_file($child_file_path))
+									deployment::backup_file($backup_file->get_full_path());
+
+								$result = deployment::push_file($conn, $child_file_path, $dir_from, $dir_to, $from);
+							}
+						}
+					} else {
+						$result
+							->set_success(false)
+							->set_msg('File is not a directory.')
+							->set_data('title', 'Error')
+							->set_data('type', 'error');
+					}
 				} else {
 					$result
 						->set_success(false)

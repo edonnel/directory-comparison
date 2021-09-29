@@ -19,80 +19,83 @@
     ?>
 </style>
 
-<div class="ca title_box" style="margin-bottom:0;">
-    <div class="l">
-        <h1>Directory Comparison</h1>
-    </div>
-    <div style="display:flex;justify-content:center;align-items:center;" class="r tr">
-        <div class="l p_r">
-            <span id="refresh" class="icon action push" style="font-size:24px;cursor:pointer;"><?= get_svg_icon('sync-alt') ?></span>
+<div class="directory-comparison">
+    <div class="dc-header">
+        <div class="dc-header-left">
+            <h1>Directory Comparison</h1>
         </div>
-        <div class="l" style="color:rgba(0,0,0,0.75);">
-            <div>Last Updated</div>
-            <div class="l"><b><span id="last_updated"><?= date('m-d-Y g:ia') ?></span></b></div>
+        <div class="dc-header-right">
+            <div class="dc-header-refresh">
+                <span id="refresh" class="icon action push" style="font-size:24px;cursor:pointer;"><?= get_svg_icon('sync-alt') ?></span>
+            </div>
+            <div class="dc-header-last-updated">
+                <div>Last Updated</div>
+                <div><b><span id="last_updated"><?= date('m-d-Y g:ia') ?></span></b></div>
+            </div>
         </div>
     </div>
+
+    <? $critical = \alerts::are_critical(); ?>
+
+    <?= \alerts::get(); ?>
+
+    <? if (!$critical) : ?>
+
+    <div class="listing">
+
+        <div id="listing_files">
+
+            <div class="listing-files-grid">
+
+                <? foreach (['stag','prod'] as $from) : ?>
+
+                    <div class="listing-files-grid-box">
+
+                        <form method="post" id="listing_form_<?= $from ?>" class="listing-form">
+                            <input type="hidden" name="from" value="<?= $from ?>" />
+                            <input type="hidden" name="load_all" value="0" id="load_all" />
+
+                            <div>
+                                <label for="filter_bulk_<?= $from ?>" style="display:none;">Bulk Actions:</label>
+                                <select class="filter-bulk" id="filter_bulk_<?= $from ?>" name="bulk_action" disabled>
+                                    <option value="">-- Bulk Actions --</option>
+                                    <option value="push" disabled>Push</option>
+                                    <option value="delete" disabled>Delete</option>
+                                    <option value="ignore">Ignore</option>
+                                </select>
+                                <input class="bulk-sub" type="submit" name="sub_bulk" value="Submit" disabled />
+                            </div>
+
+                            &nbsp;
+
+                            <div class="listing-files" id="listing_files_<?= $from ?>"></div>
+
+                        </form>
+
+                    </div>
+
+                <? endforeach; ?>
+
+            </div>
+
+        </div>
+
+        &nbsp;
+
+        <div id="listing_files_ignored"></div>
+
+        &nbsp;
+
+        <div id="listing_files_pushed"></div>
+
+        &nbsp;
+
+        <? require_once THIS_DIR.'/view/notes.php' ?>
+    </div>
+
+    <? require_once THIS_DIR.'/view/modal_ignore.html' ?>
+
 </div>
-
-<? $critical = \alerts::are_critical(); ?>
-
-<?= \alerts::get(); ?>
-
-<? if (!$critical) : ?>
-
-<div class="listing">
-
-    <div id="listing_files">
-
-        <div class="listing-files-grid">
-
-            <? foreach (['stag','prod'] as $from) : ?>
-
-                <div class="listing-files-grid-box">
-
-                    <form method="post" id="listing_form_<?= $from ?>" class="listing-form">
-                        <input type="hidden" name="from" value="<?= $from ?>" />
-                        <input type="hidden" name="load_all" value="0" id="load_all" />
-
-                        <div>
-                            <label for="filter_bulk_<?= $from ?>" style="display:none;">Bulk Actions:</label>
-                            <select class="filter-bulk" id="filter_bulk_<?= $from ?>" name="bulk_action" disabled>
-                                <option value="">-- Bulk Actions --</option>
-                                <option value="push" disabled>Push</option>
-                                <option value="delete" disabled>Delete</option>
-                                <option value="ignore">Ignore</option>
-                            </select>
-                            <input class="bulk-sub" type="submit" name="sub_bulk" value="Submit" disabled />
-                        </div>
-
-                        &nbsp;
-
-                        <div class="listing-files" id="listing_files_<?= $from ?>"></div>
-
-                    </form>
-
-                </div>
-
-            <? endforeach; ?>
-
-        </div>
-
-    </div>
-
-    &nbsp;
-
-    <div id="listing_files_ignored"></div>
-
-    &nbsp;
-
-    <div id="listing_files_pushed"></div>
-
-    &nbsp;
-
-    <? require_once THIS_DIR.'/view/notes.php' ?>
-</div>
-
-<? require_once THIS_DIR.'/view/modal_ignore.html' ?>
 
 <script>
     <? require_once THIS_DIR.'/src/js/modal.js'; ?>
