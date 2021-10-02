@@ -47,9 +47,9 @@
 				'extra'     => 'DEFAULT \'file\'',
 			),
 			'from' => array(
-				'type'      => 'enum(\'file\',\'dir\')',
+				'type'      => 'enum(\'stag\',\'prod\')',
 				'null'      => false,
-				'extra'     => 'DEFAULT \'file\'',
+				'extra'     => 'DEFAULT \'stag\'',
 			),
 			'deleted' => array(
 				'type'      => 'tinyint(1)',
