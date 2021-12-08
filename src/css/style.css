@@ -99,6 +99,13 @@
     align-items:center;
     text-align:right;
 }
+.dc-header .dc-header-title { font-size:20px; }
+.dc-header .dc-version {
+    font-size:12px;
+    color:gray;
+    margin-bottom:10px;
+    font-style:italic;
+}
 .dc-header .dc-header-last-updated { color:rgba(0,0,0,0.75); padding-left:15px; }
 
 .load-more { cursor:pointer; text-align:center; }
