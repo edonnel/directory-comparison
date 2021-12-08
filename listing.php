@@ -22,7 +22,8 @@
 <div class="directory-comparison">
     <div class="dc-header">
         <div class="dc-header-left">
-            <h1>Directory Comparison</h1>
+            <h1 class="dc-header-title">Directory Comparison</h1>
+            <div class="dc-version"><?= version ?></div>
         </div>
         <div class="dc-header-right">
             <div class="dc-header-refresh">
